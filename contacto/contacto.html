@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<!-- Indica al navegador que el documento esta escrito en HTML5 -->
+<!-- Abre el documento HTML; todo el sitio vive dentro de esta etiqueta -->
+<html>
+
+<!-- Titulo de la pestaña -->
+<!-- Abre el encabezado: datos de la pagina que no se muestran en pantalla -->
+<head>
+<!-- Titulo que aparece en la pestana del navegador: «Contacto | Papelería Onis» -->
+<title>Contacto | Papelería Onis</title>
+<!-- Cierra el encabezado -->
+</head>
+
+<!-- JavaScript para validar el formulario de contacto -->
+<!-- Abre el bloque de JavaScript de esta pagina -->
+<script>
+
+// Funcion para revisar los datos del formulario
+// Declara la funcion que revisa el formulario antes de enviarlo
+function validarContacto() {
+
+    // Obtenemos los datos escritos por el usuario
+    // Lee el campo 'nombre' y le quita los espacios sobrantes
+    var nombre = document.getElementsByName("nombre")[0].value.trim();
+    // Lee el campo 'correo' y le quita los espacios sobrantes
+    var correo = document.getElementsByName("correo")[0].value.trim();
+    // Lee el campo 'asunto' y le quita los espacios sobrantes
+    var asunto = document.getElementsByName("asunto")[0].value.trim();
+    // Lee el campo 'mensaje' y le quita los espacios sobrantes
+    var mensaje = document.getElementsByName("mensaje")[0].value.trim();
+
+    // Comprobamos que los campos obligatorios no esten vacios
+    // Si cualquiera de los cuatro campos obligatorios esta vacio...
+    if (nombre == "" || correo == "" || asunto == "" || mensaje == "") {
+
+        // ...muestra una ventana de aviso al usuario
+        alert("Por favor, completa todos los campos obligatorios.");
+        // Devuelve false: el navegador cancela el envio del formulario
+        return false;
+    // Cierra el bloque if
+    }
+
+    // Si los datos son correctos, se envia el formulario
+    // Devuelve true: el navegador envia el formulario
+    return true;
+// Cierra la funcion
+}
+
+</script>
+<!-- Cierra el bloque de JavaScript -->
+
+<!-- Color y diseño de pagina -->
+<!-- Abre el cuerpo visible: fondo crema, texto centrado, letra Arial y distribucion en columna para que el pie quede siempre abajo -->
+<body style="background-color:#FFF3E6; text-align:center; font-size:15px; font-family:Arial; color:#3A2E39; margin:0px; min-height:100vh; display:flex; flex-direction:column;">
+
+<!-- Abre el contenido principal; ocupa el espacio libre y empuja el pie de pagina hacia abajo -->
+<main style="flex:1;">
+
+<!-- Menu de pagina -->
+<!-- Abre la tabla del MENU de navegacion (barra rosa superior, repetida en todas las paginas) -->
+<table border="0" width="100%" style="background-color:#FFB7C8; text-align:center; padding:5px; margin:0px; border-spacing:0px;">
+<!-- Menu: abre la fila que contiene todas las opciones -->
+<tr>
+
+<!-- Menu: abre la celda del logotipo (ocupa el 12% del ancho) -->
+<th width="12%">
+<!-- Menu: abre el enlace del logotipo hacia «../index.html» -->
+<a href="../index.html">
+<!-- Menu: imagen del logotipo (../inicio/logo.png), 70x50 px -->
+<img src="../inicio/logo.png" width="70" height="50" alt="Logo de Papelería Onis">
+<!-- Menu: cierra el enlace del logotipo -->
+</a>
+<!-- Menu: cierra la celda -->
+</th>
+
+<!-- Menu: opcion «Inicio»; enlaza a «../index.html» -->
+<th><a href="../index.html" style="color:#3A2E39; text-decoration:none;">Inicio</a></th>
+
+<!-- Menu: opcion «Productos o servicios»; enlaza a «../productos/productos.html» -->
+<th><a href="../productos/productos.html" style="color:#3A2E39; text-decoration:none;">Productos o servicios</a></th>
+
+<!-- Menu: opcion «Nosotros»; enlaza a «../nosotros/nosotros.html» -->
+<th><a href="../nosotros/nosotros.html" style="color:#3A2E39; text-decoration:none;">Nosotros</a></th>
+
+<!-- Menu: opcion «Contacto»; enlaza a «contacto.html» -->
+<th><a href="contacto.html" style="color:#3A2E39; text-decoration:none;">Contacto</a></th>
+
+<!-- Menu: opcion «Realizar pedido» (carrito de pedidos); enlaza a «../pedido/pedido.html» -->
+<th><a href="../pedido/pedido.html" style="color:#3A2E39; text-decoration:none;">Realizar pedido</a></th>
+
+<!-- Menu: cierra la fila de opciones -->
+</tr>
+<!-- Cierra la tabla del menu de navegacion -->
+</table>
+
+<!-- Salto de linea (espacio vertical) -->
+<br>
+
+<!-- Presentacion -->
+<!-- Imagen del logotipo de la papeleria (../inicio/logo.png) -->
+<img src="../inicio/logo.png" width="150" alt="Logo de Papelería Onis">
+
+<!-- Titulo principal de la pagina: «¡Contáctanos!» -->
+<h1>¡Contáctanos!</h1>
+
+<!-- Linea horizontal rosa decorativa que separa secciones -->
+<hr style="height:3px; background-color:#FFB7C8; border:0; width:80%;">
+
+<!-- Abre un parrafo cuyo texto continua en las siguientes lineas -->
+<p style="font-size:17px; line-height:1.8; margin:15px 30px;">
+<!-- Texto que se muestra en pantalla: «En Papelería Onis nos interesa conocer tus dudas y ayudarte a encon...» -->
+En Papelería Onis nos interesa conocer tus dudas y ayudarte a encontrar lo que necesitas. Puedes comunicarte con nosotros por cualquiera de nuestros medios de contacto.
+<!-- Cierra el parrafo -->
+</p>
+
+<!-- Salto de linea (espacio vertical) -->
+<br>
+
+<!-- Informacion de contacto -->
+<!-- Subtitulo: «Información de contacto» -->
+<h2>Información de contacto</h2>
+
+<!-- Linea horizontal rosa decorativa que separa secciones -->
+<hr style="height:2px; background-color:#FFB7C8; border:0; width:60%;">
+
+<!-- Subtitulo de seccion: «WhatsApp» -->
+<h3>WhatsApp</h3>
+
+<!-- Abre un parrafo cuyo texto continua en las siguientes lineas -->
+<p style="font-size:17px;">
+<!-- Texto que se muestra en pantalla: «722 641 8942» -->
+722 641 8942
+<!-- Cierra el parrafo -->
+</p>
+
+<!-- Abre un parrafo cuyo texto continua en las siguientes lineas -->
+<p>
+<!-- Abre un enlace externo (en otra pestana) hacia https://wa.me/527226418942 -->
+<a href="https://wa.me/527226418942" target="_blank" style="background-color:#FFB7C8; color:#3A2E39; text-decoration:none; padding:10px 18px; font-weight:bold;">
+<!-- Texto que se muestra en pantalla: «Envíanos un mensaje por WhatsApp» -->
+Envíanos un mensaje por WhatsApp
+<!-- Cierra el enlace -->
+</a>
+<!-- Cierra el parrafo -->
+</p>
+
+<!-- Salto de linea (espacio vertical) -->
+<br>
+
+<!-- Subtitulo de seccion: «Facebook» -->
+<h3>Facebook</h3>
+
+<!-- Abre un parrafo cuyo texto continua en las siguientes lineas -->
+<p>
+<!-- Abre un enlace externo (en otra pestana) hacia https://www.facebook.com/p/Papeleria-ONIS-100078731053920/ -->
+<a href="https://www.facebook.com/p/Papeleria-ONIS-100078731053920/" target="_blank" style="background-color:#FFB7C8; color:#3A2E39; text-decoration:none; padding:10px 18px; font-weight:bold;">
+<!-- Texto que se muestra en pantalla: «Visita nuestra página de Papelería ONIS» -->
+Visita nuestra página de Papelería ONIS
+<!-- Cierra el enlace -->
+</a>
+<!-- Cierra el parrafo -->
+</p>
+
+<!-- Salto de linea (espacio vertical) -->
+<br>
+
+<!-- Subtitulo de seccion: «Dirección» -->
+<h3>Dirección</h3>
+
+<!-- Abre un parrafo cuyo texto continua en las siguientes lineas -->
+<p style="font-size:16px; line-height:1.8;">
+<!-- Texto que se muestra en pantalla: «Av. Lic. Benito Juárez 909, Barrio de la Concepción, 52100 San Mate...» -->
+Av. Lic. Benito Juárez 909, Barrio de la Concepción, 52100 San Mateo Atenco, Méx.
+<!-- Cierra el parrafo -->
+</p>
+
+<!-- Salto de linea (espacio vertical) -->
+<br>
+
+<!-- Formulario de contacto -->
+<!-- Subtitulo: «Envíanos un mensaje» -->
+<h2>Envíanos un mensaje</h2>
+
+<!-- Linea horizontal rosa decorativa que separa secciones -->
+<hr style="height:2px; background-color:#FFB7C8; border:0; width:60%;">
+
+<!-- Abre un parrafo cuyo texto continua en las siguientes lineas -->
+<p style="font-size:16px;">
+<!-- Texto que se muestra en pantalla: «Completa el siguiente formulario y cuéntanos cómo podemos ayudarte.» -->
+Completa el siguiente formulario y cuéntanos cómo podemos ayudarte.
+<!-- Cierra el parrafo -->
+</p>
+
+<!-- Formulario de contacto -->
+<!-- Abre el FORMULARIO: al enviarlo, primero ejecuta validarContacto() y despues manda los datos por POST a formsubmit.co/amari.number@gmail.com (servicio formsubmit, que los reenvia por correo) -->
+<form action="https://formsubmit.co/amari.number@gmail.com" method="POST" onsubmit="return validarContacto()">
+
+<!-- Campo oculto: asunto del correo que recibira la papeleria («Nuevo mensaje de Papelería Onis») -->
+<input type="hidden" name="_subject" value="Nuevo mensaje de Papelería Onis">
+<!-- Campo oculto: activa el captcha anti-spam de formsubmit -->
+<input type="hidden" name="_captcha" value="true">
+
+<!-- Abre la tabla que acomoda los campos del formulario en una columna -->
+<table border="0" width="85%" align="center" style="border-spacing:12px;">
+
+<!-- Abre una fila de la tabla -->
+<tr>
+<!-- Abre una celda de la tabla -->
+<td>
+<!-- Etiqueta que indica el campo: «Nombre completo:» -->
+<label>Nombre completo:</label><br><br>
+<!-- Campo de texto obligatorio, name='nombre' -->
+<input type="text" name="nombre" size="40" required style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:12px 20px; font-weight:bold; border-radius:15px;">
+<!-- Cierra la celda -->
+</td>
+<!-- Cierra la fila -->
+</tr>
+
+<!-- Abre una fila de la tabla -->
+<tr>
+<!-- Abre una celda de la tabla -->
+<td>
+<!-- Etiqueta que indica el campo: «Teléfono:» -->
+<label>Teléfono:</label><br><br>
+<!-- Campo de telefono (name='telefono') -->
+<input type="tel" name="telefono" size="40" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:12px 20px; font-weight:bold; border-radius:15px;">
+<!-- Cierra la celda -->
+</td>
+<!-- Cierra la fila -->
+</tr>
+
+<!-- Abre una fila de la tabla -->
+<tr>
+<!-- Abre una celda de la tabla -->
+<td>
+<!-- Etiqueta que indica el campo: «Correo electrónico:» -->
+<label>Correo electrónico:</label><br><br>
+<!-- Campo de correo electronico (name='correo'); el navegador valida el formato -->
+<input type="email" name="correo" size="40" required style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:12px 20px; font-weight:bold; border-radius:15px;">
+<!-- Cierra la celda -->
+</td>
+<!-- Cierra la fila -->
+</tr>
+
+<!-- Abre una fila de la tabla -->
+<tr>
+<!-- Abre una celda de la tabla -->
+<td>
+<!-- Etiqueta que indica el campo: «Asunto:» -->
+<label>Asunto:</label><br><br>
+<!-- Campo de texto obligatorio, name='asunto' -->
+<input type="text" name="asunto" size="40" required style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:12px 20px; font-weight:bold; border-radius:15px;">
+<!-- Cierra la celda -->
+</td>
+<!-- Cierra la fila -->
+</tr>
+
+<!-- Abre una fila de la tabla -->
+<tr>
+<!-- Abre una celda de la tabla -->
+<td>
+<!-- Etiqueta que indica el campo: «Mensaje:» -->
+<label>Mensaje:</label><br><br>
+<!-- Area de texto multilinea obligatorio, name='mensaje' -->
+<textarea name="mensaje" rows="6" cols="40" required style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:12px 20px; font-weight:bold; border-radius:15px;"></textarea>
+<!-- Cierra la celda -->
+</td>
+<!-- Cierra la fila -->
+</tr>
+
+<!-- Abre una fila de la tabla -->
+<tr>
+<!-- Abre una celda de la tabla -->
+<td>
+<!-- Boton de envio «Enviar mensaje»; dispara la validacion y el envio del formulario -->
+<input type="submit" value="Enviar mensaje" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:12px 20px; font-weight:bold;">
+<!-- Cierra la celda -->
+</td>
+<!-- Cierra la fila -->
+</tr>
+
+<!-- Cierra la tabla -->
+</table>
+
+<!-- Cierra el formulario -->
+</form>
+
+<!-- Dos saltos de linea (espacio vertical mayor) -->
+<br><br>
+
+<!-- Cierra el contenido principal -->
+</main>
+
+<!-- Pie de pagina -->
+<!-- Abre el pie de pagina rosa (barra inferior) -->
+<footer style="background-color:#FFB7C8; color:#3A2E39; width:100%; box-sizing:border-box; font-weight:bold; padding:12px; margin-top:auto;">
+<!-- Texto del pie de pagina -->
+Papelería Onis | Todo para tus ideas
+<!-- Cierra el pie de pagina -->
+</footer>
+
+<!-- Cierra el cuerpo de la pagina -->
+</body>
+<!-- Cierra el documento HTML -->
+</html>

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<!-- Indica al navegador que el documento esta escrito en HTML5 -->
+<!-- Abre el documento HTML; todo el sitio vive dentro de esta etiqueta -->
+<html>
+
+<!-- Titulo de la pestaña -->
+<!-- Abre el encabezado: datos de la pagina que no se muestran en pantalla -->
+<head>
+<!-- Titulo que aparece en la pestana del navegador: «Productos y servicios | Papelería Onis» -->
+<title>Productos y servicios | Papelería Onis</title>
+<!-- Cierra el encabezado -->
+</head>
+
+<!-- Color y diseño de pagina -->
+<!-- Abre el cuerpo visible: fondo crema, texto centrado, letra Arial y distribucion en columna para que el pie quede siempre abajo -->
+<body style="background-color:#FFF3E6; text-align:center; font-size:15px; font-family:Arial; color:#3A2E39; margin:0px; min-height:100vh; display:flex; flex-direction:column;">
+
+<!-- Abre el contenido principal; ocupa el espacio libre y empuja el pie de pagina hacia abajo -->
+<main style="flex:1;">
+
+<!-- Menu de pagina -->
+<!-- Abre la tabla del MENU de navegacion (barra rosa superior, repetida en todas las paginas) -->
+<table border="0" width="100%" style="background-color:#FFB7C8; text-align:center; padding:5px; margin:0px; border-spacing:0px;">
+<!-- Menu: abre la fila que contiene todas las opciones -->
+<tr>
+
+<!-- Menu: abre la celda del logotipo (ocupa el 12% del ancho) -->
+<th width="12%">
+<!-- Menu: abre el enlace del logotipo hacia «../index.html» -->
+<a href="../index.html">
+<!-- Menu: imagen del logotipo (../inicio/logo.png), 70x50 px -->
+<img src="../inicio/logo.png" width="70" height="50" alt="Logo de Papelería Onis">
+<!-- Menu: cierra el enlace del logotipo -->
+</a>
+<!-- Menu: cierra la celda -->
+</th>
+
+<!-- Menu: opcion «Inicio»; enlaza a «../index.html» -->
+<th><a href="../index.html" style="color:#3A2E39; text-decoration:none;">Inicio</a></th>
+
+<!-- Menu: opcion «Productos o servicios»; enlaza a «productos.html» -->
+<th><a href="productos.html" style="color:#3A2E39; text-decoration:none;">Productos o servicios</a></th>
+
+<!-- Menu: opcion «Nosotros»; enlaza a «../nosotros/nosotros.html» -->
+<th><a href="../nosotros/nosotros.html" style="color:#3A2E39; text-decoration:none;">Nosotros</a></th>
+
+<!-- Menu: opcion «Contacto»; enlaza a «../contacto/contacto.html» -->
+<th><a href="../contacto/contacto.html" style="color:#3A2E39; text-decoration:none;">Contacto</a></th>
+
+<!-- Menu: opcion «Realizar pedido» (carrito de pedidos); enlaza a «../pedido/pedido.html» -->
+<th><a href="../pedido/pedido.html" style="color:#3A2E39; text-decoration:none;">Realizar pedido</a></th>
+
+<!-- Menu: cierra la fila de opciones -->
+</tr>
+<!-- Cierra la tabla del menu de navegacion -->
+</table>
+
+<!-- Titulo y descripcion -->
+<!-- Salto de linea (espacio vertical) -->
+<br>
+
+<!-- Titulo principal de la pagina: «Nuestros productos y servicios» -->
+<h1 style="color:#3A2E39;">Nuestros productos y servicios</h1>
+
+<!-- Linea horizontal rosa decorativa que separa secciones -->
+<hr style="height:3px; background-color:#FFB7C8; border:0; width:80%;">
+
+<!-- Abre un parrafo cuyo texto continua en las siguientes lineas -->
+<p style="margin:10px 30px; line-height:1.8; font-size:17px;">
+<!-- Texto que se muestra en pantalla: «Encuentra todo lo que necesitas para la escuela, la oficina y tus p...» -->
+Encuentra todo lo que necesitas para la escuela, la oficina y tus proyectos creativos. Explora nuestras categorías y descubre lo que tenemos para ti.
+<!-- Cierra el parrafo -->
+</p>
+
+<!-- Salto de linea (espacio vertical) -->
+<br>
+
+<!-- Tabla de categorias de productos -->
+<!-- Abre la tabla que acomoda las tarjetas en cuadricula -->
+<table border="0" width="90%" align="center" style="margin:auto; border-spacing:15px; text-align:center;">
+
+<!-- Primera fila -->
+<!-- Abre una fila de la tabla -->
+<tr>
+
+<!-- Abre una celda de la tabla -->
+<td width="50%" style="background-color:white; padding:15px; border:2px solid #FFB7C8;">
+
+<!-- Abre un enlace hacia «../productos/escritura/artescritura.html» -->
+<a href="../productos/escritura/artescritura.html">
+<!-- Foto representativa de la categoria «Artículos de escritura» (../productos/prod1.png) -->
+<img src="../productos/prod1.png" width="220" alt="Artículos de escritura" style="max-width:100%;">
+<!-- Cierra el enlace -->
+</a>
+
+<!-- Nombre de la categoria: «Artículos de escritura» -->
+<h3>Artículos de escritura</h3>
+
+<!-- Descripcion breve de la categoria «Artículos de escritura» -->
+<p style="line-height:1.6;">Lápices, plumas, colores y marcadores para tus actividades escolares y creativas.</p>
+
+<!-- Enlace de texto «Ver productos →» hacia la pagina de la categoria: «../productos/escritura/artescritura.html» -->
+<a href="../productos/escritura/artescritura.html" style="color:#3A2E39; font-weight:bold; text-decoration:none;">Ver productos →</a>
+
+<!-- Cierra la celda -->
+</td>
+
+<!-- Abre una celda de la tabla -->
+<td width="50%" style="background-color:white; padding:15px; border:2px solid #FFB7C8;">
+
+<!-- Abre un enlace hacia «../productos/papelcarton/papel.html» -->
+<a href="../productos/papelcarton/papel.html">
+<!-- Foto representativa de la categoria «Papel y cartón» (../productos/prod2.png) -->
+<img src="../productos/prod2.png" width="220" alt="Papel y cartón" style="max-width:100%;">
+<!-- Cierra el enlace -->
+</a>
+
+<!-- Nombre de la categoria: «Papel y cartón» -->
+<h3>Papel y cartón</h3>
+
+<!-- Descripcion breve de la categoria «Papel y cartón» -->
+<p style="line-height:1.6;">Materiales para tareas, trabajos escolares, impresiones y manualidades.</p>
+
+<!-- Enlace de texto «Ver productos →» hacia la pagina de la categoria: «../productos/papelcarton/papel.html» -->
+<a href="../productos/papelcarton/papel.html" style="color:#3A2E39; font-weight:bold; text-decoration:none;">Ver productos →</a>
+
+<!-- Cierra la celda -->
+</td>
+<!-- Cierra la fila -->
+</tr>
+
+<!-- Segunda fila -->
+<!-- Abre una fila de la tabla -->
+<tr>
+
+<!-- Abre una celda de la tabla -->
+<td style="background-color:white; padding:15px; border:2px solid #FFB7C8;">
+
+<!-- Abre un enlace hacia «../productos/adhesivos/adhesivocorte.html» -->
+<a href="../productos/adhesivos/adhesivocorte.html">
+<!-- Foto representativa de la categoria «Adhesivos y corte» (../productos/prod3.png) -->
+<img src="../productos/prod3.png" width="220" alt="Adhesivos y corte" style="max-width:100%;">
+<!-- Cierra el enlace -->
+</a>
+
+<!-- Nombre de la categoria: «Adhesivos y corte» -->
+<h3>Adhesivos y corte</h3>
+
+<!-- Descripcion breve de la categoria «Adhesivos y corte» -->
+<p style="line-height:1.6;">Pegamentos, cintas adhesivas y herramientas para recortar y crear.</p>
+
+<!-- Enlace de texto «Ver productos →» hacia la pagina de la categoria: «../productos/adhesivos/adhesivocorte.html» -->
+<a href="../productos/adhesivos/adhesivocorte.html" style="color:#3A2E39; font-weight:bold; text-decoration:none;">Ver productos →</a>
+
+<!-- Cierra la celda -->
+</td>
+
+<!-- Abre una celda de la tabla -->
+<td style="background-color:white; padding:15px; border:2px solid #FFB7C8;">
+
+<!-- Abre un enlace hacia «../productos/geometria/geometriadibujo.html» -->
+<a href="../productos/geometria/geometriadibujo.html">
+<!-- Foto representativa de la categoria «Geometría y dibujo» (../productos/prod4.png) -->
+<img src="../productos/prod4.png" width="220" alt="Geometría y dibujo" style="max-width:100%;">
+<!-- Cierra el enlace -->
+</a>
+
+<!-- Nombre de la categoria: «Geometría y dibujo» -->
+<h3>Geometría y dibujo</h3>
+
+<!-- Descripcion breve de la categoria «Geometría y dibujo» -->
+<p style="line-height:1.6;">Reglas, compases y materiales para medir, trazar y dibujar.</p>
+
+<!-- Enlace de texto «Ver productos →» hacia la pagina de la categoria: «../productos/geometria/geometriadibujo.html» -->
+<a href="../productos/geometria/geometriadibujo.html" style="color:#3A2E39; font-weight:bold; text-decoration:none;">Ver productos →</a>
+
+<!-- Cierra la celda -->
+</td>
+<!-- Cierra la fila -->
+</tr>
+
+<!-- Tercera fila -->
+<!-- Abre una fila de la tabla -->
+<tr>
+
+<!-- Abre una celda de la tabla -->
+<td style="background-color:white; padding:15px; border:2px solid #FFB7C8;">
+
+<!-- Abre un enlace hacia «../productos/organizacion/organizacion.html» -->
+<a href="../productos/organizacion/organizacion.html">
+<!-- Foto representativa de la categoria «Organización y archivo» (../productos/prod5.png) -->
+<img src="../productos/prod5.png" width="220" alt="Organización y archivo" style="max-width:100%;">
+<!-- Cierra el enlace -->
+</a>
+
+<!-- Nombre de la categoria: «Organización y archivo» -->
+<h3>Organización y archivo</h3>
+
+<!-- Descripcion breve de la categoria «Organización y archivo» -->
+<p style="line-height:1.6;">Carpetas, folders y accesorios para mantener tus documentos en orden.</p>
+
+<!-- Enlace de texto «Ver productos →» hacia la pagina de la categoria: «../productos/organizacion/organizacion.html» -->
+<a href="../productos/organizacion/organizacion.html" style="color:#3A2E39; font-weight:bold; text-decoration:none;">Ver productos →</a>
+
+<!-- Cierra la celda -->
+</td>
+
+<!-- Abre una celda de la tabla -->
+<td style="background-color:white; padding:15px; border:2px solid #FFB7C8;">
+
+<!-- Abre un enlace hacia «../productos/manualidades/manualidades.html» -->
+<a href="../productos/manualidades/manualidades.html">
+<!-- Foto representativa de la categoria «Manualidades y didácticos» (../productos/prod6.png) -->
+<img src="../productos/prod6.png" width="220" alt="Manualidades y didácticos" style="max-width:100%;">
+<!-- Cierra el enlace -->
+</a>
+
+<!-- Nombre de la categoria: «Manualidades y didácticos» -->
+<h3>Manualidades y didácticos</h3>
+
+<!-- Descripcion breve de la categoria «Manualidades y didácticos» -->
+<p style="line-height:1.6;">Materiales para crear, aprender y dar vida a tus ideas.</p>
+
+<!-- Enlace de texto «Ver productos →» hacia la pagina de la categoria: «../productos/manualidades/manualidades.html» -->
+<a href="../productos/manualidades/manualidades.html" style="color:#3A2E39; font-weight:bold; text-decoration:none;">Ver productos →</a>
+
+<!-- Cierra la celda -->
+</td>
+<!-- Cierra la fila -->
+</tr>
+
+<!-- Cuarta fila -->
+<!-- Abre una fila de la tabla -->
+<tr>
+
+<!-- Abre una celda de la tabla -->
+<td style="background-color:white; padding:15px; border:2px solid #FFB7C8;">
+
+<!-- Abre un enlace hacia «../productos/regalos/regalos.html» -->
+<a href="../productos/regalos/regalos.html">
+<!-- Foto representativa de la categoria «Regalos y detalles» (../productos/prod7.png) -->
+<img src="../productos/prod7.png" width="220" alt="Regalos y detalles" style="max-width:100%;">
+<!-- Cierra el enlace -->
+</a>
+
+<!-- Nombre de la categoria: «Regalos y detalles» -->
+<h3>Regalos y detalles</h3>
+
+<!-- Descripcion breve de la categoria «Regalos y detalles» -->
+<p style="line-height:1.6;">Detalles para cumpleaños, celebraciones y ocasiones especiales.</p>
+
+<!-- Enlace de texto «Ver productos →» hacia la pagina de la categoria: «../productos/regalos/regalos.html» -->
+<a href="../productos/regalos/regalos.html" style="color:#3A2E39; font-weight:bold; text-decoration:none;">Ver productos →</a>
+
+<!-- Cierra la celda -->
+</td>
+
+<!-- Abre una celda de la tabla -->
+<td style="background-color:white; padding:15px; border:2px solid #FFB7C8;">
+
+<!-- Abre un enlace hacia «../productos/copias/copias.html» -->
+<a href="../productos/copias/copias.html">
+<!-- Foto representativa de la categoria «Copias e impresiones» (../productos/prod8.png) -->
+<img src="../productos/prod8.png" width="220" alt="Copias e impresiones" style="max-width:100%;">
+<!-- Cierra el enlace -->
+</a>
+
+<!-- Nombre de la categoria: «Copias e impresiones» -->
+<h3>Copias e impresiones</h3>
+
+<!-- Descripcion breve de la categoria «Copias e impresiones» -->
+<p style="line-height:1.6;">Servicios de copiado, impresión y apoyo para tus documentos escolares y de oficina.</p>
+
+<!-- Enlace de texto «Ver servicios →» hacia la pagina de la categoria: «../productos/copias/copias.html» -->
+<a href="../productos/copias/copias.html" style="color:#3A2E39; font-weight:bold; text-decoration:none;">Ver servicios →</a>
+
+<!-- Cierra la celda -->
+</td>
+<!-- Cierra la fila -->
+</tr>
+
+<!-- Cierra la tabla -->
+</table>
+
+<!-- Dos saltos de linea (espacio vertical mayor) -->
+<br><br>
+
+<!-- Invitacion a realizar un pedido -->
+<!-- Subtitulo: «¿Encontraste lo que buscabas?» -->
+<h2>¿Encontraste lo que buscabas?</h2>
+
+<!-- Parrafo de texto: «Consulta nuestros productos y prepara tu pedido.» -->
+<p>Consulta nuestros productos y prepara tu pedido.</p>
+
+<!-- Abre un parrafo cuyo texto continua en las siguientes lineas -->
+<p>
+<!-- Boton «Realizar pedido» que lleva al formulario de pedido: «../pedido/pedido.html» -->
+<a href="../pedido/pedido.html" style="background-color:#FFB7C8; color:#3A2E39; text-decoration:none; padding:10px; font-weight:bold;">Realizar pedido</a>
+<!-- Cierra el parrafo -->
+</p>
+
+<!-- Salto de linea (espacio vertical) -->
+<br>
+
+<!-- Cierra el contenido principal -->
+</main>
+
+<!-- Pie de pagina -->
+<!-- Abre el pie de pagina rosa (barra inferior) -->
+<footer style="background-color:#FFB7C8; color:#3A2E39; width:100%; box-sizing:border-box; font-weight:bold; padding:12px; margin-top:auto;">
+<!-- Texto del pie de pagina -->
+Papelería Onis | Todo para tus ideas
+<!-- Cierra el pie de pagina -->
+</footer>
+
+<!-- Cierra el cuerpo de la pagina -->
+</body>
+<!-- Cierra el documento HTML -->
+</html>

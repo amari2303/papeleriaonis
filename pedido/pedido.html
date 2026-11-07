@@ -1,0 +1,2013 @@
+<!DOCTYPE html>
+<!-- Indica al navegador que el documento esta escrito en HTML5 -->
+<!-- Abre el documento HTML; todo el sitio vive dentro de esta etiqueta -->
+<html>
+
+<!-- Titulo de la pestaña -->
+<!-- Abre el encabezado: datos de la pagina que no se muestran en pantalla -->
+<head>
+<!-- Titulo que aparece en la pestana del navegador: «Realizar pedido | Papelería Onis» -->
+<title>Realizar pedido | Papelería Onis</title>
+
+<!-- JavaScript para validar el pedido y mostrar las opciones -->
+<!-- Abre el bloque de JavaScript de esta pagina -->
+<script>
+
+// Funcion que revisa que el pedido tenga productos
+// Funcion que se ejecuta al enviar el pedido (onsubmit); devuelve true/false
+function validarPedido() {
+
+    // Obtiene todos los selectores de marca/presentacion (sus nombres terminan en _presentacion)
+    var productos = document.querySelectorAll("select[name$='_presentacion']");
+    // Contador de productos que el cliente si eligio
+    var seleccionados = 0;
+
+    // Recorre uno por uno los 64 productos del catalogo
+    for (var i = 0; i < productos.length; i++) {
+
+        // Guarda el nombre del selector actual (ej. cat1_prod1_presentacion)
+        var nombre = productos[i].name;
+        // Calcula el nombre del campo de cantidad que le corresponde (cat1_prod1_cantidad)
+        var nombreCantidad = nombre.replace("_presentacion", "_cantidad");
+        // Busca ese campo de cantidad en la pagina
+        var cantidad = document.getElementsByName(nombreCantidad)[0];
+
+        // Si el cliente eligio una marca/presentacion en este producto...
+        if (productos[i].value != "") {
+
+            // ...suma uno al contador de productos elegidos
+            seleccionados++;
+
+            // Si la cantidad esta vacia o es menor que 1...
+            if (cantidad.value == "" || cantidad.value < 1) {
+                // ...avisa que falta una cantidad valida
+                alert("Escribe una cantidad válida para cada producto seleccionado.");
+                // Coloca el cursor en el campo de cantidad que falta
+                cantidad.focus();
+                // Cancela el envio del formulario
+                return false;
+            // Cierra el bloque if
+            }
+
+        // Cierra el bloque if anterior y abre otro: Si NO eligio marca pero SI escribio una cantidad...
+        } else if (cantidad.value != "") {
+
+            // ...avisa que falta elegir la marca o presentacion
+            alert("Selecciona la marca o presentación del producto que deseas pedir.");
+            // Coloca el cursor en el selector de marca que falta
+            productos[i].focus();
+            // Cancela el envio del formulario
+            return false;
+        // Cierra el bloque if
+        }
+    // Cierra el ciclo for
+    }
+
+    // Si despues de revisar todo no se eligio ningun producto...
+    if (seleccionados == 0) {
+        // ...avisa que el pedido esta vacio
+        alert("Selecciona por lo menos un producto para realizar tu pedido.");
+        // Cancela el envio del formulario
+        return false;
+    // Cierra el bloque if
+    }
+
+    // Si el cliente solicita envio, debe proporcionar su direccion
+    // Lee si el cliente eligio recoger en tienda o envio a domicilio
+    var entrega = document.getElementById("tipoEntrega").value;
+
+    // Si pidio envio a domicilio, la direccion es obligatoria
+    if (entrega == "Envio a domicilio") {
+        // Lee el campo calle
+        var calle = document.getElementById("calle").value;
+        // Lee el campo colonia
+        var colonia = document.getElementById("colonia").value;
+        // Lee el campo municipio
+        var municipio = document.getElementById("municipio").value;
+
+        // Si falta calle, colonia o municipio...
+        if (calle == "" || colonia == "" || municipio == "") {
+            // ...avisa que debe completar la direccion
+            alert("Completa la calle, colonia y municipio para el envio a domicilio.");
+            // Cancela el envio del formulario
+            return false;
+        // Cierra el bloque if
+        }
+    // Cierra el bloque if
+    }
+
+    // Todo esta correcto: permite enviar el pedido
+    return true;
+// Cierra la funcion
+}
+
+// Muestra u oculta los datos de direccion
+// Funcion que muestra u oculta el recuadro de direccion (onchange del tipo de entrega)
+function mostrarDireccion() {
+    // Lee si el cliente eligio recoger en tienda o envio a domicilio
+    var entrega = document.getElementById("tipoEntrega").value;
+    // Obtiene el recuadro (div) que contiene los campos de direccion
+    var direccion = document.getElementById("datosDireccion");
+
+    // Si pidio envio a domicilio, la direccion es obligatoria
+    if (entrega == "Envio a domicilio") {
+        // Envio a domicilio: muestra el recuadro de direccion
+        direccion.hidden = false;
+    // Cierra el bloque if anterior y abre otro: En cualquier otro caso...
+    } else {
+        // ...oculta el recuadro de direccion
+        direccion.hidden = true;
+    // Cierra el bloque else
+    }
+// Cierra la funcion
+}
+
+// Muestra u oculta los campos de contacto según el medio elegido
+// Funcion que muestra el campo de telefono o de correo segun el medio elegido
+function mostrarMedioContacto() {
+    // Lee el medio de contacto elegido
+    var medio = document.getElementById("medioContacto").value;
+    // Obtiene el bloque del campo de telefono
+    var divTelefono = document.getElementById("campoTelefono");
+    // Obtiene el bloque del campo de correo
+    var divCorreo = document.getElementById("campoCorreo");
+
+    // Ocultar ambos por defecto
+    // Oculta el campo de telefono
+    divTelefono.hidden = true;
+    // Oculta el campo de correo
+    divCorreo.hidden = true;
+
+    // WhatsApp o llamada: se necesita un numero de telefono
+    if (medio === "WhatsApp" || medio === "Llamada telefónica") {
+        // Muestra el campo de telefono
+        divTelefono.hidden = false;
+    // Cierra el bloque if anterior y abre otro: Correo electronico: se necesita una direccion de correo
+    } else if (medio === "Correo electrónico") {
+        // Muestra el campo de correo
+        divCorreo.hidden = false;
+    // Cierra el bloque if
+    }
+// Cierra la funcion
+}
+
+// Muestra solamente la categoria seleccionada
+// Funcion que muestra solo la categoria elegida en el selector
+function mostrarCategoria() {
+    // Lee el numero de categoria elegido (0 a 7, o vacio)
+    var opcion = document.getElementById("selectorCategoria").value;
+    // Obtiene las 8 categorias (bloques con class='categoria') en el orden de la pagina
+    var categorias = document.querySelectorAll(".categoria");
+
+    // Recorre las 8 categorias
+    for (var i = 0; i < categorias.length; i++) {
+        // Si esta categoria es la elegida...
+        if (i == opcion && opcion != "") {
+            // ...la muestra
+            categorias[i].hidden = false;
+            // ...y la deja desplegada
+            categorias[i].open = true;
+        // Cierra el bloque if anterior y abre otro: En cualquier otro caso...
+        } else {
+            // Las demas categorias se ocultan
+            categorias[i].hidden = true;
+            // Y se dejan cerradas
+            categorias[i].open = false;
+        // Cierra el bloque else
+        }
+    // Cierra el ciclo for
+    }
+// Cierra la funcion
+}
+
+// Configura el formulario cuando termina de cargar la pagina
+// Cuando la pagina termina de cargar, ejecuta esta funcion
+document.addEventListener("DOMContentLoaded", function() {
+    // Deja la direccion oculta al iniciar
+    mostrarDireccion();
+    // Deja ocultos los campos de contacto al iniciar
+    mostrarMedioContacto();
+    // Deja ocultas las categorias al iniciar
+    mostrarCategoria();
+// Cierra la funcion del evento DOMContentLoaded y el addEventListener
+});
+
+</script>
+<!-- Cierra el bloque de JavaScript -->
+<!-- Cierra el encabezado -->
+</head>
+
+<!-- Color y diseño de pagina -->
+<!-- Abre el cuerpo visible: fondo crema, texto centrado, letra Arial y distribucion en columna para que el pie quede siempre abajo -->
+<body style="background-color:#FFF3E6; text-align:center; font-size:15px; font-family:Arial; color:#3A2E39; margin:0px; min-height:100vh; display:flex; flex-direction:column;">
+
+<!-- Abre el contenido principal; ocupa el espacio libre y empuja el pie de pagina hacia abajo -->
+<main style="flex:1;">
+
+<!-- Menu de pagina -->
+<!-- Abre la tabla del MENU de navegacion (barra rosa superior, repetida en todas las paginas) -->
+<table border="0" width="100%" style="background-color:#FFB7C8; text-align:center; padding:5px; margin:0px; border-spacing:0px;">
+<!-- Menu: abre la fila que contiene todas las opciones -->
+<tr>
+<!-- Menu: celda del logotipo (../inicio/logo.png); al hacer clic lleva a «../index.html» -->
+<th width="12%"><a href="../index.html"><img src="../inicio/logo.png" width="70" height="50" alt="Logo de Papelería Onis"></a></th>
+<!-- Menu: opcion «Inicio»; enlaza a «../index.html» -->
+<th><a href="../index.html" style="color:#3A2E39; text-decoration:none;">Inicio</a></th>
+<!-- Menu: opcion «Productos o servicios»; enlaza a «../productos/productos.html» -->
+<th><a href="../productos/productos.html" style="color:#3A2E39; text-decoration:none;">Productos o servicios</a></th>
+<!-- Menu: opcion «Nosotros»; enlaza a «../nosotros/nosotros.html» -->
+<th><a href="../nosotros/nosotros.html" style="color:#3A2E39; text-decoration:none;">Nosotros</a></th>
+<!-- Menu: opcion «Contacto»; enlaza a «../contacto/contacto.html» -->
+<th><a href="../contacto/contacto.html" style="color:#3A2E39; text-decoration:none;">Contacto</a></th>
+<!-- Menu: opcion «Realizar pedido» (carrito de pedidos); enlaza a «../pedido/pedido.html» -->
+<th><a href="../pedido/pedido.html" style="color:#3A2E39; text-decoration:none;">Realizar pedido</a></th>
+<!-- Menu: cierra la fila de opciones -->
+</tr>
+<!-- Cierra la tabla del menu de navegacion -->
+</table>
+
+<!-- Salto de linea (espacio vertical) -->
+<br>
+<!-- Imagen del logotipo de la papeleria (../inicio/logo.png) -->
+<img src="../inicio/logo.png" width="150" alt="Logo de Papelería Onis">
+<!-- Titulo principal de la pagina: «¡Realiza tu pedido!» -->
+<h1>¡Realiza tu pedido!</h1>
+<!-- Linea horizontal rosa decorativa que separa secciones -->
+<hr style="height:3px; background-color:#FFB7C8; border:0; width:80%;">
+<!-- Parrafo de texto: «Selecciona los productos que necesitas. Abre cada categoría, elige ...» -->
+<p style="font-size:17px; line-height:1.8; margin:15px 30px;">Selecciona los productos que necesitas. Abre cada categoría, elige el tipo de producto, su marca o presentación y escribe la cantidad que deseas comprar.</p>
+<!-- Parrafo con el boton «Consultar catálogo» hacia «../productos/productos.html» -->
+<p><a href="../productos/productos.html" style="background-color:#FFB7C8; color:#3A2E39; text-decoration:none; padding:10px 18px; font-weight:bold; border-radius:15px;">Consultar catálogo</a></p>
+<!-- Salto de linea (espacio vertical) -->
+<br>
+<!-- Subtitulo: «Datos del cliente» -->
+<h2>Datos del cliente</h2>
+<!-- Linea horizontal rosa decorativa que separa secciones -->
+<hr style="height:2px; background-color:#FFB7C8; border:0; width:60%;">
+
+<!-- Formulario para enviar el pedido -->
+<!-- Abre el FORMULARIO: al enviarlo, primero ejecuta validarPedido() y despues manda los datos por POST a formsubmit.co/amari.number@gmail.com (servicio formsubmit, que los reenvia por correo) -->
+<form action="https://formsubmit.co/amari.number@gmail.com" method="POST" onsubmit="return validarPedido()">
+<!-- Campo oculto: asunto del correo que recibira la papeleria («Nuevo pedido de Papelería Onis») -->
+<input type="hidden" name="_subject" value="Nuevo pedido de Papelería Onis">
+<!-- Campo oculto: activa el captcha anti-spam de formsubmit -->
+<input type="hidden" name="_captcha" value="true">
+
+<!-- Abre la tabla que acomoda los campos del formulario en una columna -->
+<table border="0" width="85%" align="center" style="border-spacing:12px;">
+<!-- Fila con la etiqueta «Nombre completo:» y su campo de texto obligatorio (name='nombre') -->
+<tr><td><label>Nombre completo:</label><br><br><input type="text" name="nombre" size="40" required style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:12px 20px; border-radius:15px;"></td></tr>
+<!-- Cierra la tabla -->
+</table>
+
+<!-- Subtitulo de seccion: «Tipo de entrega» -->
+<h3>Tipo de entrega</h3>
+<!-- Parrafo de texto: «¿Cómo deseas recibir tu pedido?» -->
+<p>¿Cómo deseas recibir tu pedido?</p>
+<!-- Lista desplegable obligatoria: tipo de entrega; al cambiar ejecuta mostrarDireccion() -->
+<select id="tipoEntrega" name="tipo_entrega" required onchange="mostrarDireccion()" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:12px 20px; border-radius:15px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Recoger en papelería» -->
+<option value="Recoger en papeleria">Recoger en papelería</option>
+<!-- Opcion: «Envío a domicilio» -->
+<option value="Envio a domicilio">Envío a domicilio</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Parrafo de texto: «El costo del envío depende de la ubicación y puede ser de hasta $28...» -->
+<p style="font-size:14px; margin:10px 25px;">El costo del envío depende de la ubicación y puede ser de hasta $280. Se confirmará antes de finalizar el pedido.</p>
+
+<!-- Recuadro de direccion de entrega; empieza oculto (hidden) y mostrarDireccion() lo muestra si se elige envio a domicilio -->
+<div id="datosDireccion" hidden style="width:85%; margin:15px auto; padding:12px; background-color:#FFF0F4; border:2px solid #FFB7C8; border-radius:12px; box-sizing:border-box;">
+<!-- Subtitulo de seccion: «Dirección de entrega» -->
+<h3>Dirección de entrega</h3>
+<!-- Texto guia del campo de direccion: «Calle y número:» -->
+<p>Calle y número:</p>
+<!-- Campo de texto name='calle' -->
+<input type="text" id="calle" name="calle" placeholder="Calle, número exterior e interior" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:12px 15px; border-radius:15px; width:80%; max-width:350px;">
+<!-- Texto guia del campo de direccion: «Colonia:» -->
+<p>Colonia:</p>
+<!-- Campo de texto name='colonia' -->
+<input type="text" id="colonia" name="colonia" placeholder="Colonia" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:12px 15px; border-radius:15px; width:80%; max-width:350px;">
+<!-- Texto guia del campo de direccion: «Municipio:» -->
+<p>Municipio:</p>
+<!-- Campo de texto name='municipio' -->
+<input type="text" id="municipio" name="municipio" placeholder="Municipio" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:12px 15px; border-radius:15px; width:80%; max-width:350px;">
+<!-- Texto guia del campo de direccion: «Referencias para localizar el domicilio (opcional):» -->
+<p>Referencias para localizar el domicilio (opcional):</p>
+<!-- Area de texto multilinea opcional, name='referencias' -->
+<textarea name="referencias" rows="2" cols="35" placeholder="Entre calles, color de fachada, local cercano, etc." style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:12px 15px; border-radius:15px;"></textarea>
+<!-- Cierra el bloque (div) -->
+</div>
+
+<!-- Salto de linea (espacio vertical) -->
+<br>
+
+<!-- Subtitulo: «Selecciona tus productos» -->
+<h2>Selecciona tus productos</h2>
+<!-- Nota pequeña: los precios pueden variar segun la existencia -->
+<p style="font-size:14px; color:#5A4A59;">* Nota: Los precios de los productos pueden variar dependiendo de la existencia.</p>
+
+<!-- Parrafo de texto: «Primero selecciona la categoría que necesitas:» -->
+<p>Primero selecciona la categoría que necesitas:</p>
+
+<!-- Lista desplegable para elegir la categoria; al cambiar ejecuta mostrarCategoria() (muestra solo esa categoria) -->
+<select id="selectorCategoria" class="campo-cliente" onchange="mostrarCategoria()" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:12px 20px; border-radius:15px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+    <option value="">Selecciona una categoría</option>
+<!-- Opcion: «Artículos de escritura» -->
+    <option value="0">Artículos de escritura</option>
+<!-- Opcion: «Papel y cartón» -->
+    <option value="1">Papel y cartón</option>
+<!-- Opcion: «Adhesivos y corte» -->
+    <option value="2">Adhesivos y corte</option>
+<!-- Opcion: «Geometría y dibujo» -->
+    <option value="3">Geometría y dibujo</option>
+<!-- Opcion: «Organización y archivo» -->
+    <option value="4">Organización y archivo</option>
+<!-- Opcion: «Manualidades y didácticos» -->
+    <option value="5">Manualidades y didácticos</option>
+<!-- Opcion: «Regalos y detalles» -->
+    <option value="6">Regalos y detalles</option>
+<!-- Opcion: «Copias e impresiones» -->
+    <option value="7">Copias e impresiones</option>
+<!-- Cierra la lista desplegable -->
+</select>
+
+<!-- Parrafo de texto: «Puedes cambiar de categoría para agregar más productos a tu pedido.» -->
+<p style="font-size:14px;">Puedes cambiar de categoría para agregar más productos a tu pedido.</p>
+
+<!-- Abre una CATEGORIA del catalogo (class='categoria'); mostrarCategoria() la muestra u oculta -->
+<details class="categoria" style="width:85%; margin:12px auto; text-align:left; background-color:#FFF0F4; border:2px solid #FFB7C8; border-radius:12px; padding:12px;">
+<!-- Titulo de la categoria (siempre visible): «1. Artículos de escritura» -->
+<summary style="font-size:18px; font-weight:bold; cursor:pointer;">1. Artículos de escritura</summary>
+<!-- Salto de linea (espacio vertical) -->
+<br>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Lápices» -->
+<summary style="font-weight:bold;">Lápices</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Lápices» (name='cat1_prod1_presentacion') -->
+<select name="cat1_prod1_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Dixon: $5 por pieza» -->
+<option value="Dixon: $5 por pieza">Dixon: $5 por pieza</option>
+<!-- Opcion: «Mirado: $6 por pieza» -->
+<option value="Mirado: $6 por pieza">Mirado: $6 por pieza</option>
+<!-- Opcion: «Norma: $7 por pieza» -->
+<option value="Norma: $7 por pieza">Norma: $7 por pieza</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Lápices» (cat1_prod1_cantidad) -->
+<input type="number" name="cat1_prod1_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Lapiceros» -->
+<summary style="font-weight:bold;">Lapiceros</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Lapiceros» (name='cat1_prod2_presentacion') -->
+<select name="cat1_prod2_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «BIC: $15 por pieza» -->
+<option value="BIC: $15 por pieza">BIC: $15 por pieza</option>
+<!-- Opcion: «Pentel: $20 por pieza» -->
+<option value="Pentel: $20 por pieza">Pentel: $20 por pieza</option>
+<!-- Opcion: «Paper Mate: $18 por pieza» -->
+<option value="Paper Mate: $18 por pieza">Paper Mate: $18 por pieza</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Lapiceros» (cat1_prod2_cantidad) -->
+<input type="number" name="cat1_prod2_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Plumas» -->
+<summary style="font-weight:bold;">Plumas</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Plumas» (name='cat1_prod3_presentacion') -->
+<select name="cat1_prod3_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «BIC: $5 por pieza» -->
+<option value="BIC: $5 por pieza">BIC: $5 por pieza</option>
+<!-- Opcion: «Paper Mate: $8 por pieza» -->
+<option value="Paper Mate: $8 por pieza">Paper Mate: $8 por pieza</option>
+<!-- Opcion: «Pilot: $12 por pieza» -->
+<option value="Pilot: $12 por pieza">Pilot: $12 por pieza</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Plumas» (cat1_prod3_cantidad) -->
+<input type="number" name="cat1_prod3_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Colores» -->
+<summary style="font-weight:bold;">Colores</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Colores» (name='cat1_prod4_presentacion') -->
+<select name="cat1_prod4_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Norma: $29 por paquete» -->
+<option value="Norma: $29 por paquete">Norma: $29 por paquete</option>
+<!-- Opcion: «Maped: $45 por paquete» -->
+<option value="Maped: $45 por paquete">Maped: $45 por paquete</option>
+<!-- Opcion: «Crayola: $55 por paquete» -->
+<option value="Crayola: $55 por paquete">Crayola: $55 por paquete</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Colores» (cat1_prod4_cantidad) -->
+<input type="number" name="cat1_prod4_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Plumones» -->
+<summary style="font-weight:bold;">Plumones</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Plumones» (name='cat1_prod5_presentacion') -->
+<select name="cat1_prod5_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Pelikan: $45 por paquete» -->
+<option value="Pelikan: $45 por paquete">Pelikan: $45 por paquete</option>
+<!-- Opcion: «Maped: $55 por paquete» -->
+<option value="Maped: $55 por paquete">Maped: $55 por paquete</option>
+<!-- Opcion: «Crayola: $60 por paquete» -->
+<option value="Crayola: $60 por paquete">Crayola: $60 por paquete</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Plumones» (cat1_prod5_cantidad) -->
+<input type="number" name="cat1_prod5_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Marcadores» -->
+<summary style="font-weight:bold;">Marcadores</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Marcadores» (name='cat1_prod6_presentacion') -->
+<select name="cat1_prod6_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «BIC: $7 por pieza» -->
+<option value="BIC: $7 por pieza">BIC: $7 por pieza</option>
+<!-- Opcion: «Sharpie: $20 por pieza» -->
+<option value="Sharpie: $20 por pieza">Sharpie: $20 por pieza</option>
+<!-- Opcion: «Pelikan: $12 por pieza» -->
+<option value="Pelikan: $12 por pieza">Pelikan: $12 por pieza</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Marcadores» (cat1_prod6_cantidad) -->
+<input type="number" name="cat1_prod6_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Resaltadores» -->
+<summary style="font-weight:bold;">Resaltadores</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Resaltadores» (name='cat1_prod7_presentacion') -->
+<select name="cat1_prod7_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «BIC: $10 por pieza» -->
+<option value="BIC: $10 por pieza">BIC: $10 por pieza</option>
+<!-- Opcion: «Stabilo: $20 por pieza» -->
+<option value="Stabilo: $20 por pieza">Stabilo: $20 por pieza</option>
+<!-- Opcion: «Maped: $12 por pieza» -->
+<option value="Maped: $12 por pieza">Maped: $12 por pieza</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Resaltadores» (cat1_prod7_cantidad) -->
+<input type="number" name="cat1_prod7_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Correctores» -->
+<summary style="font-weight:bold;">Correctores</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Correctores» (name='cat1_prod8_presentacion') -->
+<select name="cat1_prod8_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «BIC: $15 por pieza» -->
+<option value="BIC: $15 por pieza">BIC: $15 por pieza</option>
+<!-- Opcion: «Paper Mate: $18 por pieza» -->
+<option value="Paper Mate: $18 por pieza">Paper Mate: $18 por pieza</option>
+<!-- Opcion: «Pelikan: $16 por pieza» -->
+<option value="Pelikan: $16 por pieza">Pelikan: $16 por pieza</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Correctores» (cat1_prod8_cantidad) -->
+<input type="number" name="cat1_prod8_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Cierra el desplegable -->
+</details>
+
+<!-- Abre una CATEGORIA del catalogo (class='categoria'); mostrarCategoria() la muestra u oculta -->
+<details class="categoria" style="width:85%; margin:12px auto; text-align:left; background-color:#FFF0F4; border:2px solid #FFB7C8; border-radius:12px; padding:12px;">
+<!-- Titulo de la categoria (siempre visible): «2. Papel y cartón» -->
+<summary style="font-size:18px; font-weight:bold; cursor:pointer;">2. Papel y cartón</summary>
+<!-- Salto de linea (espacio vertical) -->
+<br>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Hojas blancas» -->
+<summary style="font-weight:bold;">Hojas blancas</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Hojas blancas» (name='cat2_prod1_presentacion') -->
+<select name="cat2_prod1_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Norma: $45 por paquete» -->
+<option value="Norma: $45 por paquete">Norma: $45 por paquete</option>
+<!-- Opcion: «Office Depot: $55 por paquete» -->
+<option value="Office Depot: $55 por paquete">Office Depot: $55 por paquete</option>
+<!-- Opcion: «Chamex: $60 por paquete» -->
+<option value="Chamex: $60 por paquete">Chamex: $60 por paquete</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Hojas blancas» (cat2_prod1_cantidad) -->
+<input type="number" name="cat2_prod1_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Cartulinas» -->
+<summary style="font-weight:bold;">Cartulinas</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Cartulinas» (name='cat2_prod2_presentacion') -->
+<select name="cat2_prod2_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Cartulina blanca: $8 por pieza» -->
+<option value="Cartulina blanca: $8 por pieza">Cartulina blanca: $8 por pieza</option>
+<!-- Opcion: «Cartulina de color: $10 por pieza» -->
+<option value="Cartulina de color: $10 por pieza">Cartulina de color: $10 por pieza</option>
+<!-- Opcion: «Cartulina fluorescente: $15 por pieza» -->
+<option value="Cartulina fluorescente: $15 por pieza">Cartulina fluorescente: $15 por pieza</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Cartulinas» (cat2_prod2_cantidad) -->
+<input type="number" name="cat2_prod2_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Hojas de colores» -->
+<summary style="font-weight:bold;">Hojas de colores</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Hojas de colores» (name='cat2_prod3_presentacion') -->
+<select name="cat2_prod3_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Norma: $5 por hoja» -->
+<option value="Norma: $5 por hoja">Norma: $5 por hoja</option>
+<!-- Opcion: «Maped: $8 por hoja» -->
+<option value="Maped: $8 por hoja">Maped: $8 por hoja</option>
+<!-- Opcion: «Paquete surtido: $35» -->
+<option value="Paquete surtido: $35">Paquete surtido: $35</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Hojas de colores» (cat2_prod3_cantidad) -->
+<input type="number" name="cat2_prod3_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Papel crepé» -->
+<summary style="font-weight:bold;">Papel crepé</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Papel crepé» (name='cat2_prod4_presentacion') -->
+<select name="cat2_prod4_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Papel crepé liso: $8 por pieza» -->
+<option value="Papel crepé liso: $8 por pieza">Papel crepé liso: $8 por pieza</option>
+<!-- Opcion: «Papel crepé de colores: $10 por pieza» -->
+<option value="Papel crepé de colores: $10 por pieza">Papel crepé de colores: $10 por pieza</option>
+<!-- Opcion: «Paquete surtido: $40» -->
+<option value="Paquete surtido: $40">Paquete surtido: $40</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Papel crepé» (cat2_prod4_cantidad) -->
+<input type="number" name="cat2_prod4_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Papel china» -->
+<summary style="font-weight:bold;">Papel china</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Papel china» (name='cat2_prod5_presentacion') -->
+<select name="cat2_prod5_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Papel china liso: $3 por pliego» -->
+<option value="Papel china liso: $3 por pliego">Papel china liso: $3 por pliego</option>
+<!-- Opcion: «Papel china de colores: $4 por pliego» -->
+<option value="Papel china de colores: $4 por pliego">Papel china de colores: $4 por pliego</option>
+<!-- Opcion: «Paquete surtido: $25» -->
+<option value="Paquete surtido: $25">Paquete surtido: $25</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Papel china» (cat2_prod5_cantidad) -->
+<input type="number" name="cat2_prod5_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Papel cascarón» -->
+<summary style="font-weight:bold;">Papel cascarón</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Papel cascarón» (name='cat2_prod6_presentacion') -->
+<select name="cat2_prod6_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Chico: $15 por pieza» -->
+<option value="Chico: $15 por pieza">Chico: $15 por pieza</option>
+<!-- Opcion: «Mediano: $20 por pieza» -->
+<option value="Mediano: $20 por pieza">Mediano: $20 por pieza</option>
+<!-- Opcion: «Grande: $30 por pieza» -->
+<option value="Grande: $30 por pieza">Grande: $30 por pieza</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Papel cascarón» (cat2_prod6_cantidad) -->
+<input type="number" name="cat2_prod6_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Papel kraft» -->
+<summary style="font-weight:bold;">Papel kraft</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Papel kraft» (name='cat2_prod7_presentacion') -->
+<select name="cat2_prod7_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Kraft por pliego: $8» -->
+<option value="Kraft por pliego: $8">Kraft por pliego: $8</option>
+<!-- Opcion: «Rollo kraft: $45» -->
+<option value="Rollo kraft: $45">Rollo kraft: $45</option>
+<!-- Opcion: «Bolsa de papel kraft: $5 por pieza» -->
+<option value="Bolsa de papel kraft: $5 por pieza">Bolsa de papel kraft: $5 por pieza</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Papel kraft» (cat2_prod7_cantidad) -->
+<input type="number" name="cat2_prod7_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Papel opalina» -->
+<summary style="font-weight:bold;">Papel opalina</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Papel opalina» (name='cat2_prod8_presentacion') -->
+<select name="cat2_prod8_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Opalina blanca: $65 por paquete» -->
+<option value="Opalina blanca: $65 por paquete">Opalina blanca: $65 por paquete</option>
+<!-- Opcion: «Opalina de color: $80 por paquete» -->
+<option value="Opalina de color: $80 por paquete">Opalina de color: $80 por paquete</option>
+<!-- Opcion: «Opalina gruesa: $90 por paquete» -->
+<option value="Opalina gruesa: $90 por paquete">Opalina gruesa: $90 por paquete</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Papel opalina» (cat2_prod8_cantidad) -->
+<input type="number" name="cat2_prod8_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Cierra el desplegable -->
+</details>
+
+<!-- Abre una CATEGORIA del catalogo (class='categoria'); mostrarCategoria() la muestra u oculta -->
+<details class="categoria" style="width:85%; margin:12px auto; text-align:left; background-color:#FFF0F4; border:2px solid #FFB7C8; border-radius:12px; padding:12px;">
+<!-- Titulo de la categoria (siempre visible): «3. Adhesivos y corte» -->
+<summary style="font-size:18px; font-weight:bold; cursor:pointer;">3. Adhesivos y corte</summary>
+<!-- Salto de linea (espacio vertical) -->
+<br>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Pegamento en barra» -->
+<summary style="font-weight:bold;">Pegamento en barra</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Pegamento en barra» (name='cat3_prod1_presentacion') -->
+<select name="cat3_prod1_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Pritt: $20 la pieza» -->
+<option value="Pritt: $20 la pieza">Pritt: $20 la pieza</option>
+<!-- Opcion: «Resistol: $15 la pieza» -->
+<option value="Resistol: $15 la pieza">Resistol: $15 la pieza</option>
+<!-- Opcion: «Pelikan: $12 la pieza» -->
+<option value="Pelikan: $12 la pieza">Pelikan: $12 la pieza</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Pegamento en barra» (cat3_prod1_cantidad) -->
+<input type="number" name="cat3_prod1_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Pegamento líquido» -->
+<summary style="font-weight:bold;">Pegamento líquido</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Pegamento líquido» (name='cat3_prod2_presentacion') -->
+<select name="cat3_prod2_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Resistol escolar: $15 la pieza» -->
+<option value="Resistol escolar: $15 la pieza">Resistol escolar: $15 la pieza</option>
+<!-- Opcion: «Pelikan escolar: $12 la pieza» -->
+<option value="Pelikan escolar: $12 la pieza">Pelikan escolar: $12 la pieza</option>
+<!-- Opcion: «Presentación grande: $35» -->
+<option value="Presentación grande: $35">Presentación grande: $35</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Pegamento líquido» (cat3_prod2_cantidad) -->
+<input type="number" name="cat3_prod2_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Cinta adhesiva» -->
+<summary style="font-weight:bold;">Cinta adhesiva</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Cinta adhesiva» (name='cat3_prod3_presentacion') -->
+<select name="cat3_prod3_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Janel: $10 el rollo» -->
+<option value="Janel: $10 el rollo">Janel: $10 el rollo</option>
+<!-- Opcion: «Scotch: $20 el rollo» -->
+<option value="Scotch: $20 el rollo">Scotch: $20 el rollo</option>
+<!-- Opcion: «Escolar: $8 el rollo» -->
+<option value="Escolar: $8 el rollo">Escolar: $8 el rollo</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Cinta adhesiva» (cat3_prod3_cantidad) -->
+<input type="number" name="cat3_prod3_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Tijeras» -->
+<summary style="font-weight:bold;">Tijeras</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Tijeras» (name='cat3_prod4_presentacion') -->
+<select name="cat3_prod4_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Maped: $25 la pieza» -->
+<option value="Maped: $25 la pieza">Maped: $25 la pieza</option>
+<!-- Opcion: «Pelikan: $18 la pieza» -->
+<option value="Pelikan: $18 la pieza">Pelikan: $18 la pieza</option>
+<!-- Opcion: «Escolares: $15 la pieza» -->
+<option value="Escolares: $15 la pieza">Escolares: $15 la pieza</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Tijeras» (cat3_prod4_cantidad) -->
+<input type="number" name="cat3_prod4_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Silicón líquido» -->
+<summary style="font-weight:bold;">Silicón líquido</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Silicón líquido» (name='cat3_prod5_presentacion') -->
+<select name="cat3_prod5_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Presentación pequeña: $15» -->
+<option value="Presentación pequeña: $15">Presentación pequeña: $15</option>
+<!-- Opcion: «Presentación mediana: $25» -->
+<option value="Presentación mediana: $25">Presentación mediana: $25</option>
+<!-- Opcion: «Presentación grande: $40» -->
+<option value="Presentación grande: $40">Presentación grande: $40</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Silicón líquido» (cat3_prod5_cantidad) -->
+<input type="number" name="cat3_prod5_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Cinta doble cara» -->
+<summary style="font-weight:bold;">Cinta doble cara</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Cinta doble cara» (name='cat3_prod6_presentacion') -->
+<select name="cat3_prod6_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Estrecha: $15 el rollo» -->
+<option value="Estrecha: $15 el rollo">Estrecha: $15 el rollo</option>
+<!-- Opcion: «Mediana: $25 el rollo» -->
+<option value="Mediana: $25 el rollo">Mediana: $25 el rollo</option>
+<!-- Opcion: «Ancha: $35 el rollo» -->
+<option value="Ancha: $35 el rollo">Ancha: $35 el rollo</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Cinta doble cara» (cat3_prod6_cantidad) -->
+<input type="number" name="cat3_prod6_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Correctores» -->
+<summary style="font-weight:bold;">Correctores</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Correctores» (name='cat3_prod7_presentacion') -->
+<select name="cat3_prod7_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «BIC: $15 la pieza» -->
+<option value="BIC: $15 la pieza">BIC: $15 la pieza</option>
+<!-- Opcion: «Paper Mate: $18 la pieza» -->
+<option value="Paper Mate: $18 la pieza">Paper Mate: $18 la pieza</option>
+<!-- Opcion: «Cinta correctora: $20 la pieza» -->
+<option value="Cinta correctora: $20 la pieza">Cinta correctora: $20 la pieza</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Correctores» (cat3_prod7_cantidad) -->
+<input type="number" name="cat3_prod7_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Cúter» -->
+<summary style="font-weight:bold;">Cúter</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Cúter» (name='cat3_prod8_presentacion') -->
+<select name="cat3_prod8_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Escolar: $12 la pieza» -->
+<option value="Escolar: $12 la pieza">Escolar: $12 la pieza</option>
+<!-- Opcion: «Retráctil: $25 la pieza» -->
+<option value="Retráctil: $25 la pieza">Retráctil: $25 la pieza</option>
+<!-- Opcion: «Metálico: $35 la pieza» -->
+<option value="Metálico: $35 la pieza">Metálico: $35 la pieza</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Cúter» (cat3_prod8_cantidad) -->
+<input type="number" name="cat3_prod8_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Cierra el desplegable -->
+</details>
+
+<!-- Abre una CATEGORIA del catalogo (class='categoria'); mostrarCategoria() la muestra u oculta -->
+<details class="categoria" style="width:85%; margin:12px auto; text-align:left; background-color:#FFF0F4; border:2px solid #FFB7C8; border-radius:12px; padding:12px;">
+<!-- Titulo de la categoria (siempre visible): «4. Geometría y dibujo» -->
+<summary style="font-size:18px; font-weight:bold; cursor:pointer;">4. Geometría y dibujo</summary>
+<!-- Salto de linea (espacio vertical) -->
+<br>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Regla» -->
+<summary style="font-weight:bold;">Regla</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Regla» (name='cat4_prod1_presentacion') -->
+<select name="cat4_prod1_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Maped: $10 la pieza» -->
+<option value="Maped: $10 la pieza">Maped: $10 la pieza</option>
+<!-- Opcion: «Pelikan: $8 la pieza» -->
+<option value="Pelikan: $8 la pieza">Pelikan: $8 la pieza</option>
+<!-- Opcion: «Escolar sencilla: $5 la pieza» -->
+<option value="Escolar sencilla: $5 la pieza">Escolar sencilla: $5 la pieza</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Regla» (cat4_prod1_cantidad) -->
+<input type="number" name="cat4_prod1_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Juego de geometría» -->
+<summary style="font-weight:bold;">Juego de geometría</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Juego de geometría» (name='cat4_prod2_presentacion') -->
+<select name="cat4_prod2_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Maped: $45 el juego» -->
+<option value="Maped: $45 el juego">Maped: $45 el juego</option>
+<!-- Opcion: «Pelikan: $35 el juego» -->
+<option value="Pelikan: $35 el juego">Pelikan: $35 el juego</option>
+<!-- Opcion: «Escolar básico: $25 el juego» -->
+<option value="Escolar básico: $25 el juego">Escolar básico: $25 el juego</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Juego de geometría» (cat4_prod2_cantidad) -->
+<input type="number" name="cat4_prod2_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Compás» -->
+<summary style="font-weight:bold;">Compás</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Compás» (name='cat4_prod3_presentacion') -->
+<select name="cat4_prod3_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Maped: $35 la pieza» -->
+<option value="Maped: $35 la pieza">Maped: $35 la pieza</option>
+<!-- Opcion: «Pelikan: $25 la pieza» -->
+<option value="Pelikan: $25 la pieza">Pelikan: $25 la pieza</option>
+<!-- Opcion: «Escolar sencillo: $15 la pieza» -->
+<option value="Escolar sencillo: $15 la pieza">Escolar sencillo: $15 la pieza</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Compás» (cat4_prod3_cantidad) -->
+<input type="number" name="cat4_prod3_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Transportador» -->
+<summary style="font-weight:bold;">Transportador</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Transportador» (name='cat4_prod4_presentacion') -->
+<select name="cat4_prod4_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Maped: $15 la pieza» -->
+<option value="Maped: $15 la pieza">Maped: $15 la pieza</option>
+<!-- Opcion: «Pelikan: $12 la pieza» -->
+<option value="Pelikan: $12 la pieza">Pelikan: $12 la pieza</option>
+<!-- Opcion: «Escolar sencillo: $8 la pieza» -->
+<option value="Escolar sencillo: $8 la pieza">Escolar sencillo: $8 la pieza</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Transportador» (cat4_prod4_cantidad) -->
+<input type="number" name="cat4_prod4_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Escuadras» -->
+<summary style="font-weight:bold;">Escuadras</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Escuadras» (name='cat4_prod5_presentacion') -->
+<select name="cat4_prod5_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Maped: $25 el par» -->
+<option value="Maped: $25 el par">Maped: $25 el par</option>
+<!-- Opcion: «Pelikan: $18 el par» -->
+<option value="Pelikan: $18 el par">Pelikan: $18 el par</option>
+<!-- Opcion: «Escolares sencillas: $10 el par» -->
+<option value="Escolares sencillas: $10 el par">Escolares sencillas: $10 el par</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Escuadras» (cat4_prod5_cantidad) -->
+<input type="number" name="cat4_prod5_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Block de dibujo» -->
+<summary style="font-weight:bold;">Block de dibujo</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Block de dibujo» (name='cat4_prod6_presentacion') -->
+<select name="cat4_prod6_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Block pequeño: $35» -->
+<option value="Block pequeño: $35">Block pequeño: $35</option>
+<!-- Opcion: «Block mediano: $50» -->
+<option value="Block mediano: $50">Block mediano: $50</option>
+<!-- Opcion: «Block grande: $70» -->
+<option value="Block grande: $70">Block grande: $70</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Block de dibujo» (cat4_prod6_cantidad) -->
+<input type="number" name="cat4_prod6_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Lápices de dibujo» -->
+<summary style="font-weight:bold;">Lápices de dibujo</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Lápices de dibujo» (name='cat4_prod7_presentacion') -->
+<select name="cat4_prod7_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «HB: $10 la pieza» -->
+<option value="HB: $10 la pieza">HB: $10 la pieza</option>
+<!-- Opcion: «2B: $12 la pieza» -->
+<option value="2B: $12 la pieza">2B: $12 la pieza</option>
+<!-- Opcion: «Juego de dibujo: $45» -->
+<option value="Juego de dibujo: $45">Juego de dibujo: $45</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Lápices de dibujo» (cat4_prod7_cantidad) -->
+<input type="number" name="cat4_prod7_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Goma de borrar» -->
+<summary style="font-weight:bold;">Goma de borrar</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Goma de borrar» (name='cat4_prod8_presentacion') -->
+<select name="cat4_prod8_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Pelikan: $8 la pieza» -->
+<option value="Pelikan: $8 la pieza">Pelikan: $8 la pieza</option>
+<!-- Opcion: «Maped: $12 la pieza» -->
+<option value="Maped: $12 la pieza">Maped: $12 la pieza</option>
+<!-- Opcion: «Goma blanca sencilla: $5 la pieza» -->
+<option value="Goma blanca sencilla: $5 la pieza">Goma blanca sencilla: $5 la pieza</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Goma de borrar» (cat4_prod8_cantidad) -->
+<input type="number" name="cat4_prod8_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Cierra el desplegable -->
+</details>
+
+<!-- Abre una CATEGORIA del catalogo (class='categoria'); mostrarCategoria() la muestra u oculta -->
+<details class="categoria" style="width:85%; margin:12px auto; text-align:left; background-color:#FFF0F4; border:2px solid #FFB7C8; border-radius:12px; padding:12px;">
+<!-- Titulo de la categoria (siempre visible): «5. Organización y archivo» -->
+<summary style="font-size:18px; font-weight:bold; cursor:pointer;">5. Organización y archivo</summary>
+<!-- Salto de linea (espacio vertical) -->
+<br>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Carpetas» -->
+<summary style="font-weight:bold;">Carpetas</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Carpetas» (name='cat5_prod1_presentacion') -->
+<select name="cat5_prod1_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Norma: $15 la pieza» -->
+<option value="Norma: $15 la pieza">Norma: $15 la pieza</option>
+<!-- Opcion: «Con broche: $20 la pieza» -->
+<option value="Con broche: $20 la pieza">Con broche: $20 la pieza</option>
+<!-- Opcion: «Con argollas: $35 la pieza» -->
+<option value="Con argollas: $35 la pieza">Con argollas: $35 la pieza</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Carpetas» (cat5_prod1_cantidad) -->
+<input type="number" name="cat5_prod1_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Folders» -->
+<summary style="font-weight:bold;">Folders</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Folders» (name='cat5_prod2_presentacion') -->
+<select name="cat5_prod2_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Cartulina sencilla: $5 la pieza» -->
+<option value="Cartulina sencilla: $5 la pieza">Cartulina sencilla: $5 la pieza</option>
+<!-- Opcion: «Plástico: $12 la pieza» -->
+<option value="Plástico: $12 la pieza">Plástico: $12 la pieza</option>
+<!-- Opcion: «Con broche: $15 la pieza» -->
+<option value="Con broche: $15 la pieza">Con broche: $15 la pieza</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Folders» (cat5_prod2_cantidad) -->
+<input type="number" name="cat5_prod2_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Archivadores» -->
+<summary style="font-weight:bold;">Archivadores</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Archivadores» (name='cat5_prod3_presentacion') -->
+<select name="cat5_prod3_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «De palanca: $80 la pieza» -->
+<option value="De palanca: $80 la pieza">De palanca: $80 la pieza</option>
+<!-- Opcion: «De argollas: $60 la pieza» -->
+<option value="De argollas: $60 la pieza">De argollas: $60 la pieza</option>
+<!-- Opcion: «Tamaño carta: $70 la pieza» -->
+<option value="Tamaño carta: $70 la pieza">Tamaño carta: $70 la pieza</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Archivadores» (cat5_prod3_cantidad) -->
+<input type="number" name="cat5_prod3_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Separadores» -->
+<summary style="font-weight:bold;">Separadores</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Separadores» (name='cat5_prod4_presentacion') -->
+<select name="cat5_prod4_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «De cartulina: $20 el paquete» -->
+<option value="De cartulina: $20 el paquete">De cartulina: $20 el paquete</option>
+<!-- Opcion: «De plástico: $30 el paquete» -->
+<option value="De plástico: $30 el paquete">De plástico: $30 el paquete</option>
+<!-- Opcion: «De colores: $25 el paquete» -->
+<option value="De colores: $25 el paquete">De colores: $25 el paquete</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Separadores» (cat5_prod4_cantidad) -->
+<input type="number" name="cat5_prod4_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Protectores de hojas» -->
+<summary style="font-weight:bold;">Protectores de hojas</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Protectores de hojas» (name='cat5_prod5_presentacion') -->
+<select name="cat5_prod5_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Tamaño carta: $30 el paquete» -->
+<option value="Tamaño carta: $30 el paquete">Tamaño carta: $30 el paquete</option>
+<!-- Opcion: «Tamaño oficio: $40 el paquete» -->
+<option value="Tamaño oficio: $40 el paquete">Tamaño oficio: $40 el paquete</option>
+<!-- Opcion: «Gruesos: $50 el paquete» -->
+<option value="Gruesos: $50 el paquete">Gruesos: $50 el paquete</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Protectores de hojas» (cat5_prod5_cantidad) -->
+<input type="number" name="cat5_prod5_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Cajas organizadoras» -->
+<summary style="font-weight:bold;">Cajas organizadoras</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Cajas organizadoras» (name='cat5_prod6_presentacion') -->
+<select name="cat5_prod6_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Pequeña: $35 la pieza» -->
+<option value="Pequeña: $35 la pieza">Pequeña: $35 la pieza</option>
+<!-- Opcion: «Mediana: $60 la pieza» -->
+<option value="Mediana: $60 la pieza">Mediana: $60 la pieza</option>
+<!-- Opcion: «Grande: $90 la pieza» -->
+<option value="Grande: $90 la pieza">Grande: $90 la pieza</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Cajas organizadoras» (cat5_prod6_cantidad) -->
+<input type="number" name="cat5_prod6_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Broches para papel» -->
+<summary style="font-weight:bold;">Broches para papel</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Broches para papel» (name='cat5_prod7_presentacion') -->
+<select name="cat5_prod7_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Clips pequeños: $10 la caja» -->
+<option value="Clips pequeños: $10 la caja">Clips pequeños: $10 la caja</option>
+<!-- Opcion: «Clips grandes: $15 la caja» -->
+<option value="Clips grandes: $15 la caja">Clips grandes: $15 la caja</option>
+<!-- Opcion: «Broches sujetapapeles: $20 la caja» -->
+<option value="Broches sujetapapeles: $20 la caja">Broches sujetapapeles: $20 la caja</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Broches para papel» (cat5_prod7_cantidad) -->
+<input type="number" name="cat5_prod7_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Etiquetas adhesivas» -->
+<summary style="font-weight:bold;">Etiquetas adhesivas</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Etiquetas adhesivas» (name='cat5_prod8_presentacion') -->
+<select name="cat5_prod8_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Blancas: $15 el paquete» -->
+<option value="Blancas: $15 el paquete">Blancas: $15 el paquete</option>
+<!-- Opcion: «De colores: $20 el paquete» -->
+<option value="De colores: $20 el paquete">De colores: $20 el paquete</option>
+<!-- Opcion: «Para marcar útiles: $25 el paquete» -->
+<option value="Para marcar útiles: $25 el paquete">Para marcar útiles: $25 el paquete</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Etiquetas adhesivas» (cat5_prod8_cantidad) -->
+<input type="number" name="cat5_prod8_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Cierra el desplegable -->
+</details>
+
+<!-- Abre una CATEGORIA del catalogo (class='categoria'); mostrarCategoria() la muestra u oculta -->
+<details class="categoria" style="width:85%; margin:12px auto; text-align:left; background-color:#FFF0F4; border:2px solid #FFB7C8; border-radius:12px; padding:12px;">
+<!-- Titulo de la categoria (siempre visible): «6. Manualidades y didácticos» -->
+<summary style="font-size:18px; font-weight:bold; cursor:pointer;">6. Manualidades y didácticos</summary>
+<!-- Salto de linea (espacio vertical) -->
+<br>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Foami» -->
+<summary style="font-weight:bold;">Foami</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Foami» (name='cat6_prod1_presentacion') -->
+<select name="cat6_prod1_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Colores básicos: $8 la pieza» -->
+<option value="Colores básicos: $8 la pieza">Colores básicos: $8 la pieza</option>
+<!-- Opcion: «Con diamantina: $12 la pieza» -->
+<option value="Con diamantina: $12 la pieza">Con diamantina: $12 la pieza</option>
+<!-- Opcion: «Paquete surtido: $45» -->
+<option value="Paquete surtido: $45">Paquete surtido: $45</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Foami» (cat6_prod1_cantidad) -->
+<input type="number" name="cat6_prod1_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Plastilina» -->
+<summary style="font-weight:bold;">Plastilina</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Plastilina» (name='cat6_prod2_presentacion') -->
+<select name="cat6_prod2_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Paquete pequeño: $15» -->
+<option value="Paquete pequeño: $15">Paquete pequeño: $15</option>
+<!-- Opcion: «Paquete mediano: $25» -->
+<option value="Paquete mediano: $25">Paquete mediano: $25</option>
+<!-- Opcion: «Paquete grande: $40» -->
+<option value="Paquete grande: $40">Paquete grande: $40</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Plastilina» (cat6_prod2_cantidad) -->
+<input type="number" name="cat6_prod2_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Pinturas» -->
+<summary style="font-weight:bold;">Pinturas</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Pinturas» (name='cat6_prod3_presentacion') -->
+<select name="cat6_prod3_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Colores básicos: $20 el paquete» -->
+<option value="Colores básicos: $20 el paquete">Colores básicos: $20 el paquete</option>
+<!-- Opcion: «Pintura acrílica: $25 la pieza» -->
+<option value="Pintura acrílica: $25 la pieza">Pintura acrílica: $25 la pieza</option>
+<!-- Opcion: «Paquete surtido: $60» -->
+<option value="Paquete surtido: $60">Paquete surtido: $60</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Pinturas» (cat6_prod3_cantidad) -->
+<input type="number" name="cat6_prod3_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Pinceles» -->
+<summary style="font-weight:bold;">Pinceles</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Pinceles» (name='cat6_prod4_presentacion') -->
+<select name="cat6_prod4_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Paquete pequeño: $10» -->
+<option value="Paquete pequeño: $10">Paquete pequeño: $10</option>
+<!-- Opcion: «Paquete mediano: $20» -->
+<option value="Paquete mediano: $20">Paquete mediano: $20</option>
+<!-- Opcion: «Paquete surtido: $35» -->
+<option value="Paquete surtido: $35">Paquete surtido: $35</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Pinceles» (cat6_prod4_cantidad) -->
+<input type="number" name="cat6_prod4_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Palitos de madera» -->
+<summary style="font-weight:bold;">Palitos de madera</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Palitos de madera» (name='cat6_prod5_presentacion') -->
+<select name="cat6_prod5_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Paquete pequeño: $15» -->
+<option value="Paquete pequeño: $15">Paquete pequeño: $15</option>
+<!-- Opcion: «Paquete mediano: $25» -->
+<option value="Paquete mediano: $25">Paquete mediano: $25</option>
+<!-- Opcion: «Paquete grande: $40» -->
+<option value="Paquete grande: $40">Paquete grande: $40</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Palitos de madera» (cat6_prod5_cantidad) -->
+<input type="number" name="cat6_prod5_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Ojos móviles» -->
+<summary style="font-weight:bold;">Ojos móviles</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Ojos móviles» (name='cat6_prod6_presentacion') -->
+<select name="cat6_prod6_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Pequeños: $10 el paquete» -->
+<option value="Pequeños: $10 el paquete">Pequeños: $10 el paquete</option>
+<!-- Opcion: «Medianos: $15 el paquete» -->
+<option value="Medianos: $15 el paquete">Medianos: $15 el paquete</option>
+<!-- Opcion: «Grandes: $20 el paquete» -->
+<option value="Grandes: $20 el paquete">Grandes: $20 el paquete</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Ojos móviles» (cat6_prod6_cantidad) -->
+<input type="number" name="cat6_prod6_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Diamantina» -->
+<summary style="font-weight:bold;">Diamantina</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Diamantina» (name='cat6_prod7_presentacion') -->
+<select name="cat6_prod7_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Frasco pequeño: $10» -->
+<option value="Frasco pequeño: $10">Frasco pequeño: $10</option>
+<!-- Opcion: «Frasco mediano: $15» -->
+<option value="Frasco mediano: $15">Frasco mediano: $15</option>
+<!-- Opcion: «Paquete de colores: $35» -->
+<option value="Paquete de colores: $35">Paquete de colores: $35</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Diamantina» (cat6_prod7_cantidad) -->
+<input type="number" name="cat6_prod7_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Rompecabezas didáctico» -->
+<summary style="font-weight:bold;">Rompecabezas didáctico</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Rompecabezas didáctico» (name='cat6_prod8_presentacion') -->
+<select name="cat6_prod8_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Pequeño: $35» -->
+<option value="Pequeño: $35">Pequeño: $35</option>
+<!-- Opcion: «Mediano: $55» -->
+<option value="Mediano: $55">Mediano: $55</option>
+<!-- Opcion: «Grande: $80» -->
+<option value="Grande: $80">Grande: $80</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Rompecabezas didáctico» (cat6_prod8_cantidad) -->
+<input type="number" name="cat6_prod8_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Cierra el desplegable -->
+</details>
+
+<!-- Abre una CATEGORIA del catalogo (class='categoria'); mostrarCategoria() la muestra u oculta -->
+<details class="categoria" style="width:85%; margin:12px auto; text-align:left; background-color:#FFF0F4; border:2px solid #FFB7C8; border-radius:12px; padding:12px;">
+<!-- Titulo de la categoria (siempre visible): «7. Regalos y detalles» -->
+<summary style="font-size:18px; font-weight:bold; cursor:pointer;">7. Regalos y detalles</summary>
+<!-- Salto de linea (espacio vertical) -->
+<br>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Bolsas de regalo» -->
+<summary style="font-weight:bold;">Bolsas de regalo</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Bolsas de regalo» (name='cat7_prod1_presentacion') -->
+<select name="cat7_prod1_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Pequeñas: $15/pieza» -->
+<option value="Pequeñas: $15/pieza">Pequeñas: $15/pieza</option>
+<!-- Opcion: «Medianas: $20/pieza» -->
+<option value="Medianas: $20/pieza">Medianas: $20/pieza</option>
+<!-- Opcion: «Grandes: $30/pieza» -->
+<option value="Grandes: $30/pieza">Grandes: $30/pieza</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Bolsas de regalo» (cat7_prod1_cantidad) -->
+<input type="number" name="cat7_prod1_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Papel para envolver» -->
+<summary style="font-weight:bold;">Papel para envolver</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Papel para envolver» (name='cat7_prod2_presentacion') -->
+<select name="cat7_prod2_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Sencillo: $10/pieza» -->
+<option value="Sencillo: $10/pieza">Sencillo: $10/pieza</option>
+<!-- Opcion: «Decorado: $15/pieza» -->
+<option value="Decorado: $15/pieza">Decorado: $15/pieza</option>
+<!-- Opcion: «Metalizado: $20/pieza» -->
+<option value="Metalizado: $20/pieza">Metalizado: $20/pieza</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Papel para envolver» (cat7_prod2_cantidad) -->
+<input type="number" name="cat7_prod2_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Moños decorativos» -->
+<summary style="font-weight:bold;">Moños decorativos</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Moños decorativos» (name='cat7_prod3_presentacion') -->
+<select name="cat7_prod3_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Pequeños: $8/pieza» -->
+<option value="Pequeños: $8/pieza">Pequeños: $8/pieza</option>
+<!-- Opcion: «Medianos: $12/pieza» -->
+<option value="Medianos: $12/pieza">Medianos: $12/pieza</option>
+<!-- Opcion: «Grandes: $18/pieza» -->
+<option value="Grandes: $18/pieza">Grandes: $18/pieza</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Moños decorativos» (cat7_prod3_cantidad) -->
+<input type="number" name="cat7_prod3_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Tarjetas de felicitación» -->
+<summary style="font-weight:bold;">Tarjetas de felicitación</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Tarjetas de felicitación» (name='cat7_prod4_presentacion') -->
+<select name="cat7_prod4_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Sencillas: $10/pieza» -->
+<option value="Sencillas: $10/pieza">Sencillas: $10/pieza</option>
+<!-- Opcion: «Decoradas: $15/pieza» -->
+<option value="Decoradas: $15/pieza">Decoradas: $15/pieza</option>
+<!-- Opcion: «Especiales: $20/pieza» -->
+<option value="Especiales: $20/pieza">Especiales: $20/pieza</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Tarjetas de felicitación» (cat7_prod4_cantidad) -->
+<input type="number" name="cat7_prod4_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Peluches» -->
+<summary style="font-weight:bold;">Peluches</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Peluches» (name='cat7_prod5_presentacion') -->
+<select name="cat7_prod5_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Pequeños: $50/pieza» -->
+<option value="Pequeños: $50/pieza">Pequeños: $50/pieza</option>
+<!-- Opcion: «Medianos: $85/pieza» -->
+<option value="Medianos: $85/pieza">Medianos: $85/pieza</option>
+<!-- Opcion: «Grandes: $150/pieza» -->
+<option value="Grandes: $150/pieza">Grandes: $150/pieza</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Peluches» (cat7_prod5_cantidad) -->
+<input type="number" name="cat7_prod5_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Bocinas» -->
+<summary style="font-weight:bold;">Bocinas</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Bocinas» (name='cat7_prod6_presentacion') -->
+<select name="cat7_prod6_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Mini: $100/pieza» -->
+<option value="Mini: $100/pieza">Mini: $100/pieza</option>
+<!-- Opcion: «Portátiles: $150/pieza» -->
+<option value="Portátiles: $150/pieza">Portátiles: $150/pieza</option>
+<!-- Opcion: «Bluetooth: $200/pieza» -->
+<option value="Bluetooth: $200/pieza">Bluetooth: $200/pieza</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Bocinas» (cat7_prod6_cantidad) -->
+<input type="number" name="cat7_prod6_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Cremas y perfumes» -->
+<summary style="font-weight:bold;">Cremas y perfumes</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Cremas y perfumes» (name='cat7_prod7_presentacion') -->
+<select name="cat7_prod7_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Cremas: $85/pieza» -->
+<option value="Cremas: $85/pieza">Cremas: $85/pieza</option>
+<!-- Opcion: «Perfumes pequeños: $100/pieza» -->
+<option value="Perfumes pequeños: $100/pieza">Perfumes pequeños: $100/pieza</option>
+<!-- Opcion: «Perfumes medianos: $150/pieza» -->
+<option value="Perfumes medianos: $150/pieza">Perfumes medianos: $150/pieza</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Cremas y perfumes» (cat7_prod7_cantidad) -->
+<input type="number" name="cat7_prod7_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Listones decorativos» -->
+<summary style="font-weight:bold;">Listones decorativos</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Listones decorativos» (name='cat7_prod8_presentacion') -->
+<select name="cat7_prod8_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «2 cm: $10/rollo» -->
+<option value="2 cm: $10/rollo">2 cm: $10/rollo</option>
+<!-- Opcion: «5 cm: $15/rollo» -->
+<option value="5 cm: $15/rollo">5 cm: $15/rollo</option>
+<!-- Opcion: «7 cm: $20/rollo» -->
+<option value="7 cm: $20/rollo">7 cm: $20/rollo</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Listones decorativos» (cat7_prod8_cantidad) -->
+<input type="number" name="cat7_prod8_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Cierra el desplegable -->
+</details>
+
+<!-- Abre una CATEGORIA del catalogo (class='categoria'); mostrarCategoria() la muestra u oculta -->
+<details class="categoria" style="width:85%; margin:12px auto; text-align:left; background-color:#FFF0F4; border:2px solid #FFB7C8; border-radius:12px; padding:12px;">
+<!-- Titulo de la categoria (siempre visible): «8. Copias e impresiones» -->
+<summary style="font-size:18px; font-weight:bold; cursor:pointer;">8. Copias e impresiones</summary>
+<!-- Salto de linea (espacio vertical) -->
+<br>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Copias en blanco y negro» -->
+<summary style="font-weight:bold;">Copias en blanco y negro</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Copias en blanco y negro» (name='cat8_prod1_presentacion') -->
+<select name="cat8_prod1_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Tamaño carta: $1/hoja» -->
+<option value="Tamaño carta: $1/hoja">Tamaño carta: $1/hoja</option>
+<!-- Opcion: «Tamaño oficio: $2/hoja» -->
+<option value="Tamaño oficio: $2/hoja">Tamaño oficio: $2/hoja</option>
+<!-- Opcion: «Por ambos lados: $2/hoja» -->
+<option value="Por ambos lados: $2/hoja">Por ambos lados: $2/hoja</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Copias en blanco y negro» (cat8_prod1_cantidad) -->
+<input type="number" name="cat8_prod1_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Impresiones en blanco y negro» -->
+<summary style="font-weight:bold;">Impresiones en blanco y negro</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Impresiones en blanco y negro» (name='cat8_prod2_presentacion') -->
+<select name="cat8_prod2_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Tamaño carta: $2/hoja» -->
+<option value="Tamaño carta: $2/hoja">Tamaño carta: $2/hoja</option>
+<!-- Opcion: «Tamaño oficio: $3/hoja» -->
+<option value="Tamaño oficio: $3/hoja">Tamaño oficio: $3/hoja</option>
+<!-- Opcion: «Por ambos lados: $4/hoja» -->
+<option value="Por ambos lados: $4/hoja">Por ambos lados: $4/hoja</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Impresiones en blanco y negro» (cat8_prod2_cantidad) -->
+<input type="number" name="cat8_prod2_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Impresiones a color» -->
+<summary style="font-weight:bold;">Impresiones a color</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Impresiones a color» (name='cat8_prod3_presentacion') -->
+<select name="cat8_prod3_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Tamaño carta: $5/hoja» -->
+<option value="Tamaño carta: $5/hoja">Tamaño carta: $5/hoja</option>
+<!-- Opcion: «Tamaño oficio: $8/hoja» -->
+<option value="Tamaño oficio: $8/hoja">Tamaño oficio: $8/hoja</option>
+<!-- Opcion: «Impresión a color completa: $10/hoja» -->
+<option value="Impresión a color completa: $10/hoja">Impresión a color completa: $10/hoja</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Impresiones a color» (cat8_prod3_cantidad) -->
+<input type="number" name="cat8_prod3_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Escaneo de documentos» -->
+<summary style="font-weight:bold;">Escaneo de documentos</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Escaneo de documentos» (name='cat8_prod4_presentacion') -->
+<select name="cat8_prod4_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Una hoja: $5» -->
+<option value="Una hoja: $5">Una hoja: $5</option>
+<!-- Opcion: «De 2 a 5 hojas: $4 por hoja» -->
+<option value="De 2 a 5 hojas: $4 por hoja">De 2 a 5 hojas: $4 por hoja</option>
+<!-- Opcion: «Más de 5 hojas: $3 por hoja» -->
+<option value="Más de 5 hojas: $3 por hoja">Más de 5 hojas: $3 por hoja</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Escaneo de documentos» (cat8_prod4_cantidad) -->
+<input type="number" name="cat8_prod4_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Engargolado» -->
+<summary style="font-weight:bold;">Engargolado</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Engargolado» (name='cat8_prod5_presentacion') -->
+<select name="cat8_prod5_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Pequeño: $25/trabajo» -->
+<option value="Pequeño: $25/trabajo">Pequeño: $25/trabajo</option>
+<!-- Opcion: «Mediano: $35/trabajo» -->
+<option value="Mediano: $35/trabajo">Mediano: $35/trabajo</option>
+<!-- Opcion: «Grande: $50/trabajo» -->
+<option value="Grande: $50/trabajo">Grande: $50/trabajo</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Engargolado» (cat8_prod5_cantidad) -->
+<input type="number" name="cat8_prod5_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Enmicado» -->
+<summary style="font-weight:bold;">Enmicado</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Enmicado» (name='cat8_prod6_presentacion') -->
+<select name="cat8_prod6_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Credencial: $15/pieza» -->
+<option value="Credencial: $15/pieza">Credencial: $15/pieza</option>
+<!-- Opcion: «Tamaño carta: $25/pieza» -->
+<option value="Tamaño carta: $25/pieza">Tamaño carta: $25/pieza</option>
+<!-- Opcion: «Tamaño oficio: $35/pieza» -->
+<option value="Tamaño oficio: $35/pieza">Tamaño oficio: $35/pieza</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Enmicado» (cat8_prod6_cantidad) -->
+<input type="number" name="cat8_prod6_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Impresión de fotografías» -->
+<summary style="font-weight:bold;">Impresión de fotografías</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Impresión de fotografías» (name='cat8_prod7_presentacion') -->
+<select name="cat8_prod7_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «Pequeña: $10/fotografía» -->
+<option value="Pequeña: $10/fotografía">Pequeña: $10/fotografía</option>
+<!-- Opcion: «Mediana: $15/fotografía» -->
+<option value="Mediana: $15/fotografía">Mediana: $15/fotografía</option>
+<!-- Opcion: «Grande: $25/fotografía» -->
+<option value="Grande: $25/fotografía">Grande: $25/fotografía</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Impresión de fotografías» (cat8_prod7_cantidad) -->
+<input type="number" name="cat8_prod7_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Abre el desplegable de un producto -->
+<details style="margin:8px 0px; background-color:#FFF3E6; border-radius:10px; padding:10px;">
+<!-- Titulo del producto (al hacer clic se despliega): «Dispositivos de memoria» -->
+<summary style="font-weight:bold;">Dispositivos de memoria</summary>
+<!-- Texto guia sobre el campo siguiente: «Marca o presentación:» -->
+<p style="margin-bottom:5px;">Marca o presentación:</p>
+<!-- Lista desplegable de marca o presentacion para «Dispositivos de memoria» (name='cat8_prod8_presentacion') -->
+<select name="cat8_prod8_presentacion" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «8 GB: $150/pieza» -->
+<option value="8 GB: $150/pieza">8 GB: $150/pieza</option>
+<!-- Opcion: «16 GB: $180/pieza» -->
+<option value="16 GB: $180/pieza">16 GB: $180/pieza</option>
+<!-- Opcion: «32 GB: $220/pieza» -->
+<option value="32 GB: $220/pieza">32 GB: $220/pieza</option>
+<!-- Cierra la lista desplegable -->
+</select>
+<!-- Texto guia sobre el campo siguiente: «Cantidad:» -->
+<p style="margin-bottom:5px;">Cantidad:</p>
+<!-- Campo numerico de cantidad (minimo 1) del producto «Dispositivos de memoria» (cat8_prod8_cantidad) -->
+<input type="number" name="cat8_prod8_cantidad" min="1" placeholder="Cantidad" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:10px; border-radius:10px; width:110px;">
+<!-- Cierra el desplegable -->
+</details>
+<!-- Cierra el desplegable -->
+</details>
+
+<!-- Salto de linea (espacio vertical) -->
+<br>
+<!-- Subtitulo: «Información adicional» -->
+<h2>Información adicional</h2>
+<!-- Linea horizontal rosa decorativa que separa secciones -->
+<hr style="height:2px; background-color:#FFB7C8; border:0; width:60%;">
+
+<!-- Parrafo de texto: «¿Cómo prefieres que te contactemos?» -->
+<p>¿Cómo prefieres que te contactemos?</p>
+<!-- Lista desplegable obligatoria: medio de contacto; al cambiar ejecuta mostrarMedioContacto() -->
+<select id="medioContacto" name="medio_contacto" required onchange="mostrarMedioContacto()" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:12px 20px; border-radius:15px;">
+<!-- Opcion inicial sin valor: obliga a elegir una opcion real -->
+<option value="">Selecciona una opción</option>
+<!-- Opcion: «WhatsApp» -->
+<option value="WhatsApp">WhatsApp</option>
+<!-- Opcion: «Llamada telefónica» -->
+<option value="Llamada telefónica">Llamada telefónica</option>
+<!-- Opcion: «Correo electrónico» -->
+<option value="Correo electrónico">Correo electrónico</option>
+<!-- Cierra la lista desplegable -->
+</select>
+
+<!-- Campo dinámico para Teléfono o WhatsApp -->
+<!-- Bloque del campo de telefono; empieza oculto y mostrarMedioContacto() lo muestra con WhatsApp o llamada -->
+<div id="campoTelefono" hidden style="margin-top:15px;">
+<!-- Parrafo de texto: «Número de teléfono o WhatsApp:» -->
+<p>Número de teléfono o WhatsApp:</p>
+<!-- Campo de telefono (name='telefono') -->
+<input type="tel" name="telefono" size="30" placeholder="Escribe tu número a 10 dígitos" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:12px 15px; border-radius:15px; width:80%; max-width:350px;">
+<!-- Cierra el bloque (div) -->
+</div>
+
+<!-- Campo dinámico para Correo electrónico -->
+<!-- Bloque del campo de correo; empieza oculto y mostrarMedioContacto() lo muestra con correo electronico -->
+<div id="campoCorreo" hidden style="margin-top:15px;">
+<!-- Parrafo de texto: «Correo electrónico:» -->
+<p>Correo electrónico:</p>
+<!-- Campo de correo electronico (name='correo'); el navegador valida el formato -->
+<input type="email" name="correo" size="30" placeholder="tucorreo@ejemplo.com" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:12px 15px; border-radius:15px; width:80%; max-width:350px;">
+<!-- Cierra el bloque (div) -->
+</div>
+
+<!-- Parrafo de texto: «¿Tienes alguna indicación adicional?» -->
+<p style="margin-top:20px;">¿Tienes alguna indicación adicional?</p>
+<!-- Area de texto multilinea opcional, name='observaciones' -->
+<textarea name="observaciones" rows="4" cols="40" placeholder="Escribe aquí alguna indicación especial (opcional)." style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:12px 20px; border-radius:15px;"></textarea>
+<!-- Dos saltos de linea (espacio vertical mayor) -->
+<br><br>
+<!-- Boton de envio «Enviar pedido»; dispara la validacion y el envio del formulario -->
+<input type="submit" value="Enviar pedido" style="background-color:#FFB7C8; color:#3A2E39; border:0; padding:12px 25px; font-weight:bold; border-radius:15px; cursor:pointer;">
+<!-- Cierra el formulario -->
+</form>
+<!-- Salto de linea (espacio vertical) -->
+<br>
+<!-- Parrafo de texto: «Tu pedido será revisado y nos comunicaremos contigo para confirmar ...» -->
+<p style="font-size:14px; line-height:1.7; margin:20px;">Tu pedido será revisado y nos comunicaremos contigo para confirmar la disponibilidad y el precio final de los productos.</p>
+<!-- Dos saltos de linea (espacio vertical mayor) -->
+<br><br>
+<!-- Cierra el contenido principal -->
+</main>
+<!-- Pie de pagina rosa con el lema de la papeleria: «Papelería Onis | Todo para tus ideas» -->
+<footer style="background-color:#FFB7C8; color:#3A2E39; width:100%; box-sizing:border-box; font-weight:bold; padding:12px; margin-top:auto;">Papelería Onis | Todo para tus ideas</footer>
+<!-- Cierra el cuerpo de la pagina -->
+</body>
+<!-- Cierra el documento HTML -->
+</html>
